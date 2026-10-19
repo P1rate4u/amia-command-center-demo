@@ -1,25 +1,29 @@
-# Amia Command Center — Team Workspace Demo
+# Amia Command Center - Interactive Client Review Demo
 
-A cleaner **interactive prototype** for Louis and the Amia team. Open `index.html` locally or view the GitHub Pages site.
+A light-theme, connected interactive walkthrough with fictional data for Louis and the Amia team.
 
-## What to try
-- **Overview:** see active projects, open tasks, missing documents, review queue, and investor statuses.
-- **Client Projects:** walk sample projects through stages. Missing checklist items block progress; recording simulated expert approval requires confirmation.
-- **Team Tasks:** mark work complete and watch the counters change.
-- **Document Checklist:** mark a required sample item received or missing.
-- **Investor Tracker:** change fictional statuses and simulate a reply — no emails are sent.
-- **Team Updates / Workflow Log:** review illustrative handoffs and workflow activity.
-- **Reset demo data:** restore the original example state.
+## Open
+Double-click `index.html` in Chrome or Edge, or publish the repository root to GitHub Pages.
 
-## Safety
-- Fictional companies and investor funds; sample assignments use Jeet, Brandon, Hussnain, and Louis.
-- All activity is browser-only demonstration data. No integration to MedNova, Apollo, Gmail, Slack, or Google Sheets.
-- Data changes are local to your own browser (localStorage) and are not shared with other reviewers.
-- No sensitive customer data, credentials, regulated reports, or live investor contact data should be entered.
-- This demo does not perform regulatory sign-off, report delivery, or outreach.
+## Suggested 5-minute walkthrough
+1. **Overview:** click `Active projects` or a client row to open its detail page.
+2. **Westbridge Bio:** select the linked `Safety Dataset` checklist record. Mark it received, then follow the project link back and move the project to the next stage.
+3. **Team tasks:** open a task, change it to `Done`, save, and go back. The dashboard open-task count changes.
+4. **Investor tracker:** open a fictional investor record, change the status to `Replied`, save, and view the updated pipeline. This does not email anyone.
+5. **Add a sample project or task**, use global search, and click Reset demo to restore the original data.
+6. **Workflow log:** run a sample check and examine the illustrative failure entry.
 
-## GitHub Pages
-Use **Settings > Pages > Deploy from a branch > main > / (root)**. The website entry point is the repository-root `index.html`.
+## What is and isn't operational
+- The interface, buttons, links, editable task/investor/document statuses, project stage progression, status counters, simulated events, browser storage, search and reset are operational.
+- Data and changes persist only in each reviewer's browser; they do not sync between reviewers.
+- All client and investor names are fictional. Team example assignments include Jeet, Brandon, Hussnain and Louis, but are **not statements about real job responsibilities**.
+- No live connection to Apollo, MedNova, Gmail, Slack, Google Sheets, or regulatory document systems. No emails are sent, regulatory reports are delivered, or expert approvals are issued.
+- In the demo, required missing checklist items prevent advancing through document collection; expert signoff is a simulated confirmation only.
 
-### Client-review note
-This is a design and workflow example, not a connected production application.
+## Publish to GitHub
+1. Open the folder containing this `index.html` in VS Code.
+2. Copy the updated `index.html` and `README.md` into the **root** of your existing `amia-command-center-demo` repository.
+3. Run `git add index.html README.md && git commit -m "Make demo pages interactive" && git push origin main` in that repo.
+4. In GitHub Pages, publish the `main` branch from `/(root)`.
+
+**For concept review only — not for sensitive or production use.**
