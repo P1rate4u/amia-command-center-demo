@@ -93,10 +93,23 @@ function getDashboardData() {
     r.reviewDate <= Utilities.formatDate(now, Session.getScriptTimeZone(), "yyyy-MM-dd")
   );
   const research = rows_(book, AMIA_SHEETS.research, 2, 10).filter(r=>cell_(r,0));
-  // PERA explicitly records new send-ready prospects; prioritized firms are not necessarily new.
-  const newInvestorRows = rows_(book, AMIA_SHEETS.newInvestors, 1, 11);
-  const readyRow = newInvestorRows.find(r=>cell_(r,0)==="NEW INVESTOR FIRST-TOUCH READY");
-  const newInvestorReady = readyRow ? numeric_(cell_(readyRow,1)) : 0;
+  // Derive readiness from actual New Investors rows rather than a stale manual counter.
+  // Require complete qualified data, an explicit READY status, no recorded first touch,
+  // and no overlapping firm with earlier outreach or another ready candidate.
+  const newInvestorRows = rows_(book, AMIA_SHEETS.newInvestors, 4, 11);
+  const existingFirms = new Set(investors.map(r => r.firm.toLowerCase()));
+  const readyFirms = new Set();
+  const newInvestorReady = newInvestorRows.filter(r => {
+    const firm=cell_(r,0), email=cell_(r,4).toLowerCase(),
+          score=numeric_(cell_(r,2)), sent=cell_(r,5),
+          status=cell_(r,8), decision=cell_(r,9);
+    const unique=firm && !existingFirms.has(firm.toLowerCase()) &&
+      !readyFirms.has(firm.toLowerCase());
+    const qualified=unique && score>=65 && /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email) &&
+      !sent && /^ready\b/i.test(status) && !/^(hold|reject|exclude|no)/i.test(decision);
+    if (qualified) readyFirms.add(firm.toLowerCase());
+    return qualified;
+  }).length;
   const firstTouches=investors.length;
   // Two historical sends were removed from the active ledger. Read the reconciled
   // baseline from PERA instead of hardcoding private contact details or totals.
