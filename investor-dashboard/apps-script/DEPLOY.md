@@ -5,11 +5,19 @@
 The `apps-script/` files implement a **read-only** dashboard that reads real PERA records on each refresh (automatically every 60 seconds while the tab is visible). It has Overview, Investor Tracker and Follow-up Queue.
 
 - Google Sheets remains the source of truth. There is no second investor database, CSV upload or Apollo sending.
-- Data includes names, email addresses, reply statuses, amounts explicitly verified in PERA and staged follow-up approvals.
+- Data includes names, email addresses, reply statuses, amounts explicitly verified in PERA, staged follow-up approvals and new-investor readiness derived from New Investors rows.
 - Read-only by design: no update, send, approval, or sequence actions exist.
 - Only signed-in Google users listed in `ALLOWED_EMAILS`, **and with permission to open the original spreadsheet**, can view results.
 - The script checks `PERA_SPREADSHEET_ID` against the bound spreadsheet to avoid serving a different workbook.
 - The public GitHub repository stores **code only**, never the PERA data, credentials, or private app URL.
+
+## Continuous operational workflow
+
+- Continue adding prospects and recording sends, replies, fit scores and follow-ups **in the existing PERA sheet**.
+- The dashboard reads the latest PERA rows whenever a viewer clicks Refresh, and automatically every 60 seconds while the page is open.
+- New-investor readiness is calculated only for unique firms with a fit score of at least 65%, a valid email, blank first-send date and an explicit **READY** status in the New Investors sheet. This is a review indicator, not permission to send. Keep those source columns current.
+- Any Apollo/Gmail activity not yet entered into PERA will **not** appear in this dashboard. PERA is the sole reporting source, not Apollo synchronization.
+- If the data sync fails, the dashboard shows an error. Previously loaded information may be stale.
 
 ## Installation by PERA spreadsheet owner/editor
 
@@ -30,7 +38,7 @@ The `apps-script/` files implement a **read-only** dashboard that reads real PER
 
 ## Release checklist
 
-- Check the app shows 46 active investors, 3 replies, 10 follow-ups sent and 19 Louis-approval candidates against current PERA values before accepting the launch.
+- Check the app shows the latest actual PERA figures (currently 46 active investors, 3 replies, 10 follow-ups sent and 19 Louis-approval candidates) before accepting the launch.
 - Check the historical count includes the two previously excluded historical sends, read from PERA reconciled baseline.
 - Confirm held/excluded contacts do not enter the active follow-up queue.
 - Confirm application-stage interest is **not** treated as investment commitment.
