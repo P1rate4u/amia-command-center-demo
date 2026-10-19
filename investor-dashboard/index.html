@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Amia | Investor Dashboard V1</title>
+<link rel="stylesheet" href="./styles.css">
+<script type="module" src="./app.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="wordmark">AMIA</div><div class="subtitle">Investor Command Center</div><span class="pill">CURRENT ROUND · REVIEW BUILD</span></div>
+    <nav aria-label="Dashboard">
+      <button class="nav active" data-view="overview"><span>▦</span> Overview</button>
+      <button class="nav" data-view="investors"><span>♙</span> Investor tracker</button>
+      <button class="nav" data-view="followups"><span>◷</span> Follow-up queue</button>
+      <button class="nav" data-view="fundraising"><span>↗</span> Fundraising</button>
+      <button class="nav" data-view="activity"><span>≡</span> Activity & notes</button>
+    </nav>
+    <div class="sidebar-foot"><div class="muted tiny">OUTREACH MAILBOX</div><strong>louislalas@amia.ai</strong><p class="tiny muted">Read-only preview. No Apollo sending or automated follow-ups.</p></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><span>Amia / Fundraising workspace</span><span class="top-right"><span class="status-dot"></span> PERA snapshot · manual refresh</span></header>
+    <div class="content">
+      <div class="page-heading"><div><h1 id="page-title">Fundraising overview</h1><p id="page-description">Current $750K pre-seed round · verified tracker snapshot</p></div><div class="actions"><label class="btn primary" for="import-file">Import PERA CSV</label><input id="import-file" type="file" accept=".csv,text/csv" hidden><button id="clear-import" class="btn secondary" hidden>Clear import</button></div></div>
+      <div class="notice" role="status" id="data-notice">Showing aggregate counts from the PERA ledger verification. To review investor-level records, export the Outreach Ledger tab as CSV and import it here. The file stays in your browser memory; it is not uploaded or published.</div>
+      <section class="view active" data-panel="overview">
+        <div class="kpis">
+          <article class="kpi"><span>Investors contacted</span><strong id="metric-contacted">46</strong><small>unique first touches in PERA</small></article>
+          <article class="kpi"><span>Replies recorded</span><strong id="metric-replies">3</strong><small>verified in Louis's inbox</small></article>
+          <article class="kpi"><span>Interested investors</span><strong id="metric-interested">0</strong><small>confirmed investor interest only</small></article>
+          <article class="kpi"><span>Follow-ups to review</span><strong id="metric-followups">29</strong><small>not automatically scheduled</small></article>
+          <article class="kpi"><span>Verified commitments</span><strong id="metric-commitments">$0</strong><small>investor-level allocation pending</small></article>
+        </div>
+        <div class="panel-grid">
+          <article class="panel"><div class="panel-head"><h2>Fundraising progress</h2><span>Target $750,000</span></div><div class="progress"><div id="progress-bar"></div></div><div class="progress-meta"><strong id="progress-label">$0 allocated and verified</strong><span id="progress-pct">0% confirmed</span></div><p class="helper">Earlier outreach stated $500K committed; that figure is not yet reconciled by investor. We intentionally do not add it to the verified total.</p></article>
+          <article class="panel"><div class="panel-head"><h2>Outreach health</h2><span>Manual tracker</span></div><div class="stat-row"><span>Initial emails confirmed</span><strong id="summary-sent">46</strong></div><div class="stat-row"><span>Follow-ups already sent</span><strong id="summary-followup-sent">10</strong></div><div class="stat-row"><span>Replies recorded</span><strong id="summary-replied">3</strong></div><div class="stat-row"><span>Sequence</span><strong>Inactive</strong></div></article>
+        </div>
+        <article class="panel"><div class="panel-head"><h2>Immediate review priorities</h2><span>Human approval required</span></div><div id="priority-list" class="priority-list"></div></article>
+      </section>
+      <section class="view" data-panel="investors"><article class="panel"><div class="panel-head"><h2>Investor tracker</h2><span id="investor-count">Import PERA CSV to view individual investors</span></div><div class="filters"><input id="investor-search" type="search" placeholder="Search investor, firm or email" aria-label="Search investors"><select id="investor-filter" aria-label="Filter investors"><option value="all">All investors</option><option value="replied">Replied</option><option value="interested">Interested</option><option value="declined">Not interested</option><option value="review">Needs review</option></select></div><div class="table-scroll"><table><thead><tr><th>Investor</th><th>Firm</th><th>First touch</th><th>Reply</th><th>Interest</th><th>Commitment</th></tr></thead><tbody id="investors-body"></tbody></table></div><p id="investors-empty" class="empty">Import the Outreach Ledger CSV to populate investor records.</p></article></section>
+      <section class="view" data-panel="followups"><article class="panel"><div class="panel-head"><h2>Follow-up review queue</h2><span>No automatic sending</span></div><div class="table-scroll"><table><thead><tr><th>Investor</th><th>Firm</th><th>Review date</th><th>Latest action</th></tr></thead><tbody id="followups-body"></tbody></table></div><p id="followups-empty" class="empty">Import the Outreach Ledger CSV to see individual follow-ups.</p></article></section>
+      <section class="view" data-panel="fundraising"><div class="panel-grid"><article class="panel"><h2>Current round</h2><div class="large-money">$750,000</div><p>Fundraising target</p><div class="stat-row"><span>Verified investor commitments</span><strong id="fund-verified">$0</strong></div><div class="stat-row"><span>Remaining against verified</span><strong id="fund-remaining">$750,000</strong></div></article><article class="panel"><h2>Reconciliation required</h2><p>Previously communicated: $500,000 committed. No individual investor allocation or supporting verification has been entered in PERA.</p><p class="helper">To avoid overstating progress, only investor commitments explicitly marked Verified appear in the dashboard total.</p></article></div><article class="panel"><div class="panel-head"><h2>Commitment records</h2><span>Verified only</span></div><div class="table-scroll"><table><thead><tr><th>Investor</th><th>Firm</th><th>Verified amount</th></tr></thead><tbody id="commitment-body"></tbody></table></div><p id="commitment-empty" class="empty">No investor-level commitments have been verified in PERA.</p></article></section>
+      <section class="view" data-panel="activity"><div class="panel-grid"><article class="panel"><h2>Verified recent responses</h2><div class="activity"><b>Oct 19 · Airborne Ventures</b><p>Eduardo Küpper declined; outside regional investment mandate.</p></div><div class="activity"><b>Oct 16 · Hustle Fund</b><p>Elizabeth Yin directed the team to the application; application submitted. Not an investment commitment.</p></div><div class="activity"><b>Oct 14 · Homebrew</b><p>Hunter Walk declined; not a fit.</p></div></article><article class="panel"><h2>Data integrity</h2><p><b>46</b> unique completed first touches exist in the current Outreach Ledger. An older PERA summary listed 48; two are not yet reconciled.</p><p>Follow-up review dates are not scheduled sends. Apollo remains inactive. Reply and interest fields require human review.</p><a class="text-link" href="https://docs.google.com/spreadsheets/d/1qwPBDzOLcwJQ1E2kz8s3mJDI20cRv7sBUlKKTEPX7I8/edit#gid=741920366" target="_blank" rel="noopener noreferrer">Open PERA source tracker ↗</a></article></div></section>
+      <footer>Amia Investor Dashboard · Private review workflow recommended · No emails are sent by this interface</footer>
+    </div>
+  </main>
+</div>
+</body>
+</html>
