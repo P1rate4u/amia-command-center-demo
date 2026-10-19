@@ -1,0 +1,31 @@
+name: Investor dashboard checks
+on:
+  pull_request:
+    paths:
+      - "investor-dashboard/**"
+      - ".github/workflows/investor-dashboard-checks.yml"
+  push:
+    branches:
+      - investor-dashboard-v1
+    paths:
+      - "investor-dashboard/**"
+      - ".github/workflows/investor-dashboard-checks.yml"
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: investor-dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check JavaScript syntax
+        run: |
+          node --check app.js
+          node --check ledger.js
+      - name: Run ledger and privacy regression tests
+        run: npm test
