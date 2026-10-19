@@ -1,38 +1,23 @@
-# Amia Investor Dashboard V1
+# Amia Investor Dashboard V1 — Louis review scope
 
-This is the scoped investor-only replacement for the former all-in-one Command Center concept.
+This static review build follows Louis's revised scope: **only the current fundraising round**. The original public Command Center and its other modules are unchanged.
 
-## Open and test
-Open `investor-dashboard/index.html` through a local HTTP server because the JavaScript modules require HTTP (e.g. at repository root run `python -m http.server 8000`, then open `http://localhost:8000/investor-dashboard/`).
+## Three screens
 
-For investor-level records, export the `Outreach Ledger` tab as CSV and select **Import Outreach CSV**. To review uncontacted leads, export the `Tomorrow - Research Queue` tab as a separate CSV and use **Import Research CSV**. Do not export the entire spreadsheet as a single file. The file is processed in-memory; it is not uploaded or persisted by this version. Reloading clears it.
+1. **Overview:** contacted, replies, interested/application-stage, follow-up reviews and investor-by-investor verified commitments within the $750K target.
+2. **Investor Tracker:** browse investor names, firms, replies, stated interest status and verified allocations.
+3. **Follow-up Queue:** due review dates; suppress records with replies, declines or prior follow-ups. **No messages are sent.**
 
-## Screens
-- Overview: contacted, replies, interested, follow-up reviews, verified commitments.
-- Investor tracker: searchable and filterable records imported from the ledger.
-- Research queue: the cleaned 25-candidate research list with 23 unverified emails.
-- Follow-up queue: due dates filtered for replied, declined and already-followed-up investors.
-- Fundraising: verified investor-level amount and remaining target.
-- Activity: verified responses and data-reconciliation notes.
+## Current PERA snapshot
 
-## Scope and limitations
-- Aggregate-only initial snapshot: 46 unique completed first touches, 3 recorded replies, 1 user-classified Interested/application-stage (Hustle Fund; actual interest not verified), 29 follow-up reviews, 10 follow-ups sent, 0 verified investor allocations, $750K target. The prior $500K stated commitment is not reconciled by investor.
-- The pre-import aggregates are a fixed snapshot and do not auto-refresh.
-- The deployed static site is NOT an authenticated private app. Do not enter sensitive client information or publish the investor-level CSV in GitHub. If this is deployed to a publicly accessible host, treat it as a demo/review site.
-- For actual team collaboration and automatic Apollo/PERA sync, add an authenticated server-side integration later.
-- This site does not send email or activate any Apollo sequence. No secrets, email accounts or API tokens are used.
-- Supabase and Render work for the previous Command Center scope remains paused.
-- The main GitHub Pages `main` branch is not modified.
+46 unique current-ledger first touches; 3 replies; 1 user-classified Interested/application-stage (Hustle Fund, which requested an application, not an investment commitment); 10 already-sent follow-ups; 29 requiring individual review. $500K was previously stated as committed toward $750K, but no investor-level commitment has yet been marked Verified in PERA. Do not interpret $0 recorded as $0 actually committed.
 
-## File organization
-- `index.html`: presentation and navigation
-- `styles.css`: scoped dashboard styling
-- `ledger.js`: CSV parsing and follow-up/verification rules
-- `app.js`: in-memory state, UI wiring and local rendering
+These are fixed snapshot counts until an **Outreach Ledger CSV** is imported. To import records, download only the `Outreach Ledger` tab from PERA as a CSV and use **Import Outreach CSV**. Data remains in browser memory for the current session and clears on reload. This version is *not* an automatic Sheets or Apollo sync.
 
-Review on `investor-dashboard-v1` branch before any merge or release.
+## Testing
 
-## Checks completed
-- Confirmed all script-referenced element IDs exist in the HTML and all six views are present.
-- Confirmed the research CSV importer and browser-local rendering are wired to the new tab.
-- Live browser execution, CSV import testing with a real export and authenticated private deployment still pending.
+At repo root, run `python -m http.server 8000` and open `http://localhost:8000/investor-dashboard/`. From `investor-dashboard/`, run `npm test` to check the parser and duplicate/follow-up rules. A pull-request GitHub Actions workflow also runs syntax and regression checks when enabled. These tests do not replace a real browser walkthrough with an anonymized sample CSV.
+
+## Data safety / release gate
+
+This repository is **public**, and the static site has no user authentication. Do not commit PERA exports, investor emails, API keys or tokens. Do not deploy a full live investor tracker publicly. Before sharing real investor records with Louis/team, choose authenticated private hosting or a secure backend with restricted access, and validate browser behavior. The currently open GitHub pull request is a *draft* and should not be merged until those checks complete. No Apollo automated sequences or sending actions are enabled.
