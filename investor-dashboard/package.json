@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/ledger.test.mjs",
+    "test": "node --test tests/ledger.test.mjs tests/apps-script.test.mjs",
     "test:browser": "node tests/browser.test.mjs"
   },
   "devDependencies": {
