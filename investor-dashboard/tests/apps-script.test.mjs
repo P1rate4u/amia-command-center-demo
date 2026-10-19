@@ -30,6 +30,7 @@ function testContext({user="louis@amia.ai", allow="louis@amia.ai,team@amia.ai", 
     "Outreach Ledger":makeSheet(4,ledgerRows),
     "19 Follow-ups - Louis Approval":makeSheet(3,approvalRows),
     "Unverified Data":makeSheet(2,[["Kim","Example VC","NOT VERIFIED"],["Kim","Example VC","NOT VERIFIED"],["Pat","Other VC","pat@example.test"]]),
+    "New Investors":makeSheet(1,[["NEW INVESTORS | CURRENT ROUND"],["Note"],["Firm"],["Everywhere Ventures"],["NEW INVESTOR FIRST-TOUCH READY","0"]]),
     "PERA Dashboard":makeSheet(27,snapshotRows)
   };
   const scriptProps={ALLOWED_EMAILS:allow,PERA_SPREADSHEET_ID:configuredId};
@@ -61,6 +62,7 @@ test("live dashboard deduplicates records and enforces approval suppression",()=
   assert.equal(result.metrics.awaitingApproval,1);
   assert.equal(result.metrics.unassignedDue,0);
   assert.equal(result.metrics.research,3);
+  assert.equal(result.metrics.newInvestorReady,0);
   assert.equal(result.metrics.unverified,2);
   assert.equal(result.approvals[0].name,"Alex");
   assert.equal(result.approvals.length,1);
