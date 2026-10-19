@@ -33,7 +33,7 @@ function draw(payload) {
  if(!payload || !payload.metrics || !Array.isArray(payload.investors) || !Array.isArray(payload.approvals))throw new Error("Unexpected PERA server response.");
  data=payload;
  const m=payload.metrics;
- for (const id of ["historical","active","replies","followupSent","awaitingApproval","interested","unassignedDue","research","unverified"])
+ for (const id of ["historical","active","replies","followupSent","awaitingApproval","interested","unassignedDue","research","unverified","newInvestorReady"])
    put(id,m[id]??"—");
  put("committed",money(m.committed)+" recorded");
  put("progress-pct",((m.committed||0)/(m.target||750000)*100).toFixed(1)+"%");
@@ -56,7 +56,7 @@ function refresh() {
 }
 function fail(e) {
  const message=String(e?.message || e || "Unable to load PERA.");
- put("sync-state","● Connection failed");
+ put("sync-state","● Sync failed · last successful data may be stale");
  put("error","Could not load private investor data: "+message);
  $("error").hidden=false;
 }
