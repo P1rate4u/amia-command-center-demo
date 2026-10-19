@@ -50,6 +50,9 @@ function getDashboardData() {
   // A bound script uses the caller's Sheets permissions, never a stored key.
   const book = SpreadsheetApp.getActiveSpreadsheet();
   if (!book) throw new Error("Install this script from the PERA Google Sheet.");
+  const expectedId = String(PropertiesService.getScriptProperties().getProperty("PERA_SPREADSHEET_ID") || "").trim();
+  if (!expectedId || book.getId() !== expectedId)
+    throw new Error("PERA spreadsheet identity has not been configured or does not match.");
   const seen = new Set();
   const investors = [];
   for (const r of rows_(book, AMIA_SHEETS.ledger, 5, 16)) {
@@ -90,6 +93,14 @@ function getDashboardData() {
   );
   const research = rows_(book, AMIA_SHEETS.research, 2, 10).filter(r=>cell_(r,0));
   const firstTouches=investors.length;
+  // Two historical sends were removed from the active ledger. Read the reconciled
+  // baseline from PERA instead of hardcoding private contact details or totals.
+  const summary = new Map(rows_(book, AMIA_SHEETS.snapshot, 27, 2).map(r=>[cell_(r,0),numeric_(cell_(r,1))]));
+  const baseHistorical = summary.get("Historical first touches");
+  const baseActive = summary.get("Active ledger first touches");
+  if (!Number.isFinite(baseHistorical) || !Number.isFinite(baseActive) || baseHistorical < baseActive)
+    throw new Error("PERA reconciliation totals are missing or invalid.");
+  const legacyExcluded = baseHistorical - baseActive;
   const replies=investors.filter(r=>reply_(r.reply)).length;
   const followupSent=investors.filter(r=>sentFollowup_(r.action)).length;
   const interested=investors.filter(r=>r.interest==="Interested").length;
@@ -97,7 +108,7 @@ function getDashboardData() {
   const result = {
     asOf: Utilities.formatDate(now, Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm:ss z"),
     metrics:{
-      active:firstTouches, historical:firstTouches + 2, replies, interested,
+      active:firstTouches, historical:firstTouches + legacyExcluded, replies, interested,
       followupSent, awaitingApproval:approvals.length, unassignedDue:due.length,
       research:research.length,
       unverified:research.filter(r=>cell_(r,2)==="NOT VERIFIED").length,
