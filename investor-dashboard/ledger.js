@@ -49,3 +49,23 @@ export const isDeclined=r=>r.interest==="Not interested" || /not interested/i.te
 export const isFollowupSent=r=>/follow-up SENT/i.test(r.action);
 export const isDue=(r,today)=>!!r.reviewDate && /^\d{4}-\d{2}-\d{2}$/.test(r.reviewDate) && r.reviewDate<=today && !isFollowupSent(r) && !isReply(r) && !isDeclined(r);
 export const isVerified=r=>r.verification==="Verified" && r.amount>0;
+
+export function readResearchQueue(csv) {
+  const rows=parseCsv(csv.replace(/^\uFEFF/, ""));
+  const index=rows.findIndex(r=>r[0]?.trim()==="Investor" && r.some(c=>/^PERA status$/i.test(c.trim())));
+  if(index<0)throw new Error("Export the Tomorrow - Research Queue tab as CSV.");
+  const headers=rows[index].map(x=>x.trim().toLowerCase());
+  const at=(row,name)=>String(row[headers.indexOf(name)]??"").trim();
+  const items=[],seen=new Set();
+  for(const row of rows.slice(index+1)){
+    const name=at(row,"investor"),firm=at(row,"firm");
+    if(!name||!firm)continue;
+    const key=(name+"|"+firm).toLowerCase();
+    if(seen.has(key))continue;
+    seen.add(key);
+    items.push({name,firm,email:at(row,"verified email (apollo)"),score:at(row,"fit score (estimated)"),
+      status:at(row,"pera status"),notes:at(row,"important notes")});
+  }
+  if(!items.length)throw new Error("No candidates found in this CSV.");
+  return items;
+}
