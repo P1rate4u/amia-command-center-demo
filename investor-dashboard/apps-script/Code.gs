@@ -9,6 +9,7 @@ const AMIA_SHEETS = Object.freeze({
   ledger: "Outreach Ledger",
   approvals: "19 Follow-ups - Louis Approval",
   research: "Unverified Data",
+  newInvestors: "New Investors",
   snapshot: "PERA Dashboard"
 });
 function requireAccess_() {
@@ -92,6 +93,10 @@ function getDashboardData() {
     r.reviewDate <= Utilities.formatDate(now, Session.getScriptTimeZone(), "yyyy-MM-dd")
   );
   const research = rows_(book, AMIA_SHEETS.research, 2, 10).filter(r=>cell_(r,0));
+  // PERA explicitly records new send-ready prospects; prioritized firms are not necessarily new.
+  const newInvestorRows = rows_(book, AMIA_SHEETS.newInvestors, 1, 11);
+  const readyRow = newInvestorRows.find(r=>cell_(r,0)==="NEW INVESTOR FIRST-TOUCH READY");
+  const newInvestorReady = readyRow ? numeric_(cell_(readyRow,1)) : 0;
   const firstTouches=investors.length;
   // Two historical sends were removed from the active ledger. Read the reconciled
   // baseline from PERA instead of hardcoding private contact details or totals.
@@ -101,6 +106,9 @@ function getDashboardData() {
   if (!Number.isFinite(baseHistorical) || !Number.isFinite(baseActive) || baseHistorical < baseActive)
     throw new Error("PERA reconciliation totals are missing or invalid.");
   const legacyExcluded = baseHistorical - baseActive;
+  const reconciliationNote = baseHistorical===baseActive
+    ? "PERA historical and active counts match."
+    : "Historical total includes previously excluded first touches.";
   const replies=investors.filter(r=>reply_(r.reply)).length;
   const followupSent=investors.filter(r=>sentFollowup_(r.action)).length;
   const interested=investors.filter(r=>r.interest==="Interested").length;
@@ -110,12 +118,12 @@ function getDashboardData() {
     metrics:{
       active:firstTouches, historical:firstTouches + legacyExcluded, replies, interested,
       followupSent, awaitingApproval:approvals.length, unassignedDue:due.length,
-      research:research.length,
+      research:research.length, newInvestorReady,
       unverified:research.filter(r=>cell_(r,2)==="NOT VERIFIED").length,
       committed, target:750000
     },
     investors, approvals,
-    notice:"PERA is the source. Live read-only view; no Apollo sending. Historical total includes two previously excluded contacts."
+    notice:"PERA is the source. Live read-only view; no Apollo sending. "+reconciliationNote
   };
   return result;
 }
