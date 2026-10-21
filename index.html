@@ -383,6 +383,80 @@ button.outreach-stream{
   }
 }
 
+
+/* Louis approval alert panel */
+.louis-approval-panel{
+  margin:0 0 18px;
+  border:1px solid #f0c6ca;
+  border-left:4px solid #cf4e57;
+  border-radius:14px;
+  background:linear-gradient(180deg,#fffafa 0%,#fff6f6 100%);
+  box-shadow:0 8px 28px rgba(173,54,64,.07);
+  overflow:hidden;
+  animation:approvalGlow 3.2s ease-in-out infinite;
+}
+.louis-approval-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 16px 11px;
+  border-bottom:1px solid #f2dadd;
+}
+.louis-approval-pulse{
+  width:10px;height:10px;border-radius:50%;
+  background:#d14f58;
+  box-shadow:0 0 0 6px rgba(209,79,88,.10);
+  animation:approvalPulse 1.8s ease-in-out infinite;
+  flex:0 0 auto;
+}
+.louis-approval-copy{min-width:0;flex:1}
+.louis-approval-kicker{
+  display:block;
+  color:#c14951;
+  font-size:9px;
+  line-height:1;
+  font-weight:850;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  margin-bottom:5px;
+}
+.louis-approval-head h3{margin:0;color:#8f3038;font-size:15px}
+.louis-approval-head p{margin:4px 0 0;color:#946970;font-size:10px}
+.louis-approval-count{
+  min-width:31px;height:31px;padding:0 9px;border-radius:999px;
+  display:grid;place-items:center;
+  background:#c94750;color:#fff;font-size:12px;font-weight:850;
+  box-shadow:0 4px 12px rgba(190,57,67,.18);
+}
+.louis-approval-list{padding:4px 14px 10px}
+.louis-approval-item{
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  gap:12px;
+  padding:10px 2px;
+  border-bottom:1px solid #f3dddf;
+}
+.louis-approval-item:last-child{border-bottom:0}
+.louis-approval-item strong{display:block;color:#6e3036;font-size:12px}
+.louis-approval-item small{display:block;color:#9b7378;font-size:10px;margin-top:3px}
+.louis-approval-item .linktext{color:#8f3038!important;font-weight:750!important}
+.louis-approval-empty{
+  padding:13px 16px;color:#6f8a7d;background:#f7fbf8;font-size:11px;
+}
+@keyframes approvalPulse{
+  0%,100%{box-shadow:0 0 0 5px rgba(209,79,88,.08);opacity:.92}
+  50%{box-shadow:0 0 0 9px rgba(209,79,88,.02);opacity:1}
+}
+@keyframes approvalGlow{
+  0%,100%{box-shadow:0 8px 28px rgba(173,54,64,.055)}
+  50%{box-shadow:0 10px 32px rgba(173,54,64,.10)}
+}
+@media(max-width:800px){
+  .louis-approval-head{align-items:flex-start}
+  .louis-approval-item{grid-template-columns:1fr}
+}
+
 </style>
 <meta name="description" content="Interactive sample workspace for the proposed Amia Command Center. Fictional data only; no live connections." />
 </head>
@@ -453,7 +527,8 @@ const defaultState = {
     {id:'T-003',title:'Prepare expert review handoff',project:'AM-003',owner:'Hussnain',due:'2026-10-21',priority:'Medium',status:'In Progress'},
     {id:'T-004',title:'Approve investor follow-up list',project:'Investor',owner:'Louis',due:'2026-10-19',priority:'High',status:'Open'},
     {id:'T-005',title:'Check automation failure log',project:'Ops',owner:'Hussnain',due:'2026-10-19',priority:'Medium',status:'Open'},
-    {id:'T-006',title:'Prepare CardioX delivery package',project:'AM-004',owner:'Jeet',due:'2026-10-20',priority:'Low',status:'Done'}
+    {id:'T-006',title:'Prepare CardioX delivery package',project:'AM-004',owner:'Jeet',due:'2026-10-20',priority:'Low',status:'Done'},
+    {id:'T-007',title:'Review investor deck / materials request',project:'Investor',owner:'Louis',due:'2026-10-22',priority:'High',status:'Open'}
   ],
   documents:[
     {id:'D-001',project:'AM-001',name:'Study Report',status:'Received',owner:'Jeet'},
@@ -514,6 +589,8 @@ function renderDashboard(){
    ...state.projects.filter(p=>p.stage==='Expert Review').map(p=>`<div class="attention-row"><span class="att-mark" style="background:#eaf2fd;color:#346ab1">✓</span><div><strong><button class="linktext" data-detail="project:${p.id}">Expert review pending →</button></strong><small>${p.client} · await authorized sign-off</small></div></div>`),
    ...failures.map(a=>`<div class="attention-row"><span class="att-mark" style="background:#fff0f0;color:#b34e51">×</span><div><strong><button class="linktext" data-nav="automation">${a.name} needs a check →</button></strong><small>Illustrative workflow log · ${a.details}</small></div></div>`)
  ].slice(0,5).join('')||'<div class="empty">Nothing needs attention in the sample workspace.</div>';
+ const louisApprovals=state.tasks.filter(t=>t.owner==='Louis'&&t.status!=='Done'&&(t.priority==='High'||t.project==='Investor'));
+ const louisApprovalHtml=louisApprovals.length?louisApprovals.map(t=>`<div class="louis-approval-item"><div><strong><button class="linktext" data-detail="task:${t.id}">${t.title} →</button></strong><small>${t.project} · due ${t.due} · waiting on Louis</small></div>${badge(t.priority)}</div>`).join(''):'<div class="louis-approval-empty">No urgent approvals are waiting on Louis.</div>';
  const workload=[['Jeet','Client coordination'],['Brandon','Delivery support'],['Hussnain','Operations'],['Louis','Management']].map(([name,role])=>{const n=state.tasks.filter(t=>t.owner===name&&t.status!=='Done').length;return `<div class="team-row"><div class="initial">${name.slice(0,2).toUpperCase()}</div><div class="who">${name}<div class="role">Sample team assignment</div></div><div class="count">${n} open ${n===1?'task':'tasks'}</div></div>`}).join('');
  const invest=state.investors.map(i=>i.status).reduce((acc,s)=>(acc[s]=(acc[s]||0)+1,acc),{});
  const outreachContacted=state.investors.filter(i=>i.status!=='Scheduled').length;
@@ -538,21 +615,21 @@ function renderDashboard(){
          <div class="outreach-stream-desc">The active fundraising workstream. Progress reflects tracked investors who have moved beyond Scheduled.</div>
          <span class="outreach-status"><span class="dot"></span> Live workstream · hover for details</span>
        </div>
-       <div class="outreach-ring-wrap" aria-label="Investor outreach progress \${outreachProgress}%">
+       <div class="outreach-ring-wrap" aria-label="Investor outreach progress ${outreachProgress}%">
          <svg class="outreach-ring" viewBox="0 0 42 42" aria-hidden="true">
            <circle class="outreach-ring-track" cx="21" cy="21" r="15.9155"></circle>
-           <circle class="outreach-ring-fill" cx="21" cy="21" r="15.9155" pathLength="100" style="--offset:\${100-outreachProgress}"></circle>
+           <circle class="outreach-ring-fill" cx="21" cy="21" r="15.9155" pathLength="100" style="--offset:${100-outreachProgress}"></circle>
          </svg>
-         <div class="outreach-ring-center">\${outreachProgress}%<small>progress</small></div>
+         <div class="outreach-ring-center">${outreachProgress}%<small>progress</small></div>
        </div>
        <div class="outreach-hover-details" aria-hidden="true">
          <div class="outreach-hover-title">Investor outreach snapshot</div>
          <div class="outreach-hover-grid">
-           <div class="outreach-hover-stat"><b>\${state.investors.length}</b><span>Tracked</span></div>
-           <div class="outreach-hover-stat"><b>\${outreachContacted}</b><span>Contacted</span></div>
-           <div class="outreach-hover-stat"><b>\${outreachReplies}</b><span>Replies</span></div>
-           <div class="outreach-hover-stat"><b>\${outreachInterested}</b><span>Interested</span></div>
-           <div class="outreach-hover-stat"><b>\${outreachFollowups+outreachLouis}</b><span>Follow-up / approval</span></div>
+           <div class="outreach-hover-stat"><b>${state.investors.length}</b><span>Tracked</span></div>
+           <div class="outreach-hover-stat"><b>${outreachContacted}</b><span>Contacted</span></div>
+           <div class="outreach-hover-stat"><b>${outreachReplies}</b><span>Replies</span></div>
+           <div class="outreach-hover-stat"><b>${outreachInterested}</b><span>Interested</span></div>
+           <div class="outreach-hover-stat"><b>${outreachFollowups+outreachLouis}</b><span>Follow-up / approval</span></div>
          </div>
        </div>
      </button>
@@ -566,6 +643,14 @@ function renderDashboard(){
      </div>
    </div>
  </section>
+ ${louisApprovals.length?`<section class="louis-approval-panel" aria-label="Pending Louis approval">
+   <div class="louis-approval-head">
+     <span class="louis-approval-pulse" aria-hidden="true"></span>
+     <div class="louis-approval-copy"><span class="louis-approval-kicker">Mark Pending</span><h3>Pending Louis Approval</h3><p>Urgent decisions or materials that should not get lost in the normal task list.</p></div>
+     <span class="louis-approval-count">${louisApprovals.length}</span>
+   </div>
+   <div class="louis-approval-list">${louisApprovalHtml}</div>
+ </section>`:""}
  <div class="grid kpi-grid">
   <div class="kpi-action" data-nav="mednova" role="button" tabindex="0">${kpi('▦',active,'Active projects','Click to view client projects')}</div>
   <div class="kpi-action" data-nav="tasks" role="button" tabindex="0">${kpi('✓',open,'Open tasks','Click to review team work')}</div>
@@ -664,7 +749,7 @@ window.addInvestor=()=>{state.investors.push({id:'I-'+String(state.investors.len
 function runAutomation(){const missing=state.documents.filter(d=>d.status==='Missing').length, open=state.tasks.filter(t=>t.status!=='Done').length;state.automations.unshift({time:'Just now',name:'Command Center Health Check',status:'Success',details:`Checked ${state.projects.length} projects, ${open} open tasks, ${missing} missing documents`});save();renderAll();toast('Sample check complete',`${missing} missing documents · ${open} open tasks.`)}
 $('#modalClose').onclick=closeModal;$('#modalBackdrop').onclick=e=>{if(e.target.id==='modalBackdrop')closeModal()};$('#quickActionBtn').onclick=()=>openModal('Quick Actions',`<div class="grid stack-2" style="margin-top:0"><button class="btn primary" onclick="closeModal();openForm('project')">+ Add demo project</button><button class="btn" onclick="closeModal();openForm('task')">+ Add demo task</button><button class="btn" onclick="closeModal();openForm('investor')">+ Add demo investor</button><button class="btn success" onclick="closeModal();runAutomation()">Run health check</button></div><div class="skeleton-note">All actions modify demo data in this browser only.</div>`,`<button class="btn" onclick="closeModal()">Close</button>`);
 window.openForm=openForm;window.closeModal=closeModal;window.runAutomation=runAutomation;
-$('#notifyBtn').onclick=()=>toast('Sample alerts',state.documents.filter(d=>d.status==='Missing').length+' missing document(s) · '+state.automations.filter(a=>a.status==='Failed').length+' workflow issue(s).');
+$('#notifyBtn').onclick=()=>toast('Sample alerts',state.documents.filter(d=>d.status==='Missing').length+' missing document(s) · '+state.tasks.filter(t=>t.owner==='Louis'&&t.status!=='Done'&&(t.priority==='High'||t.project==='Investor')).length+' pending Louis approval(s) · '+state.automations.filter(a=>a.status==='Failed').length+' workflow issue(s).');
 $('#resetDemo').onclick=()=>{if(confirm('Reset all demo changes?')){state=structuredClone(defaultState);save();renderAll();goPage('dashboard');toast('Demo reset','Original sample data restored.')}};
 $$('.nav-btn[data-page]').forEach(b=>b.onclick=()=>goPage(b.dataset.page));
 $('#globalSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase(),box=$('#searchResults');if(!q){box.classList.remove('show');return}let r=[];state.projects.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).forEach(x=>r.push({type:'Project',title:`${x.id} — ${x.client}`,sub:x.stage,page:'mednova'}));state.investors.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).forEach(x=>r.push({type:'Investor',title:x.name,sub:x.status,page:'investors'}));state.tasks.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).forEach(x=>r.push({type:'Task',title:x.title,sub:x.owner,page:'tasks'}));state.documents.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).forEach(x=>r.push({type:'Document',title:x.name,sub:`${x.project} · ${x.status}`,page:'documents'}));box.innerHTML=r.slice(0,10).map((x,i)=>`<div class="search-item" data-search-page="${x.page}"><b>${x.title}</b><small>${x.type} · ${x.sub}</small></div>`).join('')||'<div class="empty">No demo results</div>';box.classList.add('show');$$('[data-search-page]').forEach(x=>x.onclick=()=>{goPage(x.dataset.searchPage);box.classList.remove('show');$('#globalSearch').value=''});});
