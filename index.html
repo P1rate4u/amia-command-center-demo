@@ -463,12 +463,12 @@ button.outreach-stream{
 }
 
 </style>
-<meta name="description" content="Interactive sample workspace for the proposed Amia Command Center. Fictional data only; no live connections." />
+<meta name="description" content="Amia Command Center. Investor Outreach is sourced from PERA data; private contact details remain in the Google Sheet." />
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><div class="brand-mark">AMIA</div><div class="brand-sub">Command Center</div><div class="demo-pill"><span class="pulse-dot"></span>SAMPLE WORKSPACE</div></div>
+    <div class="brand"><div class="brand-mark">AMIA</div><div class="brand-sub">Command Center</div><div class="demo-pill"><span class="pulse-dot"></span>PERA SOURCE</div></div>
     <nav class="nav" id="nav">
       <button class="nav-btn active" data-page="dashboard"><span class="nav-icon">⌂</span><span>Overview</span></button>
       <div class="nav-section-label">Outreach</div>
@@ -518,14 +518,7 @@ const defaultState = {
     {id:'AM-004',client:'Clearwater Pharma',name:'IND Pre-Submission',owner:'Jeet',stage:'Completed',due:'2026-10-20',status:'Completed',progress:100,blocker:''},
     {id:'AM-005',client:'Meridian Biotech',name:'Document Readiness',owner:'Jeet',stage:'Documents',due:'2026-10-23',status:'At Risk',progress:28,blocker:'CMC summary missing'}
   ],
-  investors:[
-    {id:'I-001',name:'Cedar Seed Fund',firm:'Cedar',score:92,status:'Interested',last:'2026-10-19',follow:'2026-10-21',owner:'Louis'},
-    {id:'I-002',name:'Horizon Bio Partners',firm:'Horizon',score:88,status:'Replied',last:'2026-10-19',follow:'2026-10-20',owner:'Louis'},
-    {id:'I-003',name:'Westlake Health Angels',firm:'Westlake',score:85,status:'Follow-up Due',last:'2026-10-16',follow:'2026-10-19',owner:'Hussnain'},
-    {id:'I-004',name:'Northpoint Ventures',firm:'Northpoint',score:79,status:'Scheduled',last:'2026-10-18',follow:'2026-10-22',owner:'Hussnain'},
-    {id:'I-005',name:'Bridgefield Seed',firm:'Bridgefield',score:74,status:'Sent',last:'2026-10-18',follow:'2026-10-21',owner:'Hussnain'},
-    {id:'I-006',name:'Mariner Capital',firm:'Mariner',score:71,status:'Sent',last:'2026-10-17',follow:'2026-10-20',owner:'Hussnain'}
-  ],
+  investors:[],
   tasks:[
     {id:'T-001',title:'Request missing safety dataset',project:'AM-001',owner:'Jeet',due:'2026-10-19',priority:'High',status:'Open'},
     {id:'T-002',title:'Review Westbridge document package',project:'AM-001',owner:'Brandon',due:'2026-10-20',priority:'High',status:'Open'},
@@ -571,11 +564,34 @@ const defaultState = {
   replySeries:[2,3,3,4,4,5,5,6,5,7,8,6,7,8,6,7,8,7,9,10,11,10,12,13,11,12,12,11,13,14]
 };
 let state = loadState();
+let peraData=null;
+state.investors=[];
+function applyPeraData(){
+  if(!peraData){state.investors=[];return}
+  state.investors=(peraData.investors||[]).map(i=>({
+    ...i,
+    last:i.lastActivity||i.firstSent||'',
+    follow:i.followReview||'',
+    owner:'Louis'
+  }));
+}
+async function loadPeraData(){
+  try{
+    const res=await fetch('pera-data.json?ts='+Date.now(),{cache:'no-store'});
+    if(!res.ok)throw new Error('PERA data file unavailable');
+    peraData=await res.json();
+    applyPeraData();
+  }catch(err){
+    console.error(err);
+    peraData={generatedAt:'Unavailable',source:{spreadsheetUrl:'#'},summary:{investorsContacted:0,repliesRecorded:0,interestedApplication:0,followupsSent:0,scheduled:0,roundTarget:750000,verifiedCommitted:0,replyRate:0,sequenceStatus:'UNKNOWN'},followupReview:{staged:0,completed:0,pending:0},approvals:[],agency:{},china:{}};
+    state.investors=[];
+  }
+}
 function loadState(){try{const s=localStorage.getItem('amiaDemoStateInteractiveV3');return s?JSON.parse(s):structuredClone(defaultState)}catch(e){return structuredClone(defaultState)}}
 function save(){try{localStorage.setItem('amiaDemoStateInteractiveV3',JSON.stringify(state))}catch(e){}}
 function cleanText(s){return String(s||'').trim().slice(0,120).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-function badge(status){const map={'On Track':'green','Completed':'green','Success':'green','Received':'green','Interested':'green','Replied':'green','In Progress':'blue','Sent':'blue','Scheduled':'purple','Expert Review':'purple','At Risk':'yellow','Follow-up Due':'red','Missing':'red','Failed':'red','Open':'yellow','Done':'green'};return `<span class="badge ${map[status]||'blue'}">${status}</span>`}
+function badge(status){const map={'On Track':'green','Completed':'green','Success':'green','Received':'green','Interested':'green','Meeting requested':'green','Application':'purple','Replied':'green','Declined':'red','Follow-up Sent':'blue','Hold':'yellow','Excluded':'red','In Progress':'blue','Sent':'blue','Scheduled':'purple','Expert Review':'purple','At Risk':'yellow','Follow-up Due':'red','Missing':'red','Failed':'red','Open':'yellow','Done':'green'};return `<span class="badge ${map[status]||'blue'}">${status}</span>`}
 function fmtMoney(n){return '$'+Math.round(n/1000)+'K'}
 function projectName(id){const p=state.projects.find(x=>x.id===id);return p?p.client:id}
 function toast(title,msg){const el=document.createElement('div');el.className='toast';el.innerHTML=`<strong>${title}</strong>${msg}`;$('#toasts').appendChild(el);setTimeout(()=>el.remove(),3200)}
@@ -583,100 +599,116 @@ function pageHead(title,sub,actions=''){return `<div class="page-head"><div><h1>
 function kpi(icon,value,label,sub,trend='',down=false){return `<div class="kpi"><span class="trend ${down?'down':''}">${trend}</span><div class="kpi-row"><div class="kpi-icon">${icon}</div><div><div class="kpi-value">${value}</div><div class="kpi-label">${label}</div><div class="kpi-sub">${sub}</div></div></div></div>`}
 function renderAll(){renderDashboard();renderInvestors();renderMednova();renderTasks();renderTeam();renderDocuments();renderAutomation();renderReports();renderCustomers();bindDynamic(); if(window.__detail)renderDetail(window.__detail.kind,window.__detail.id,false)}
 function renderDashboard(){
- const active=state.projects.filter(p=>p.status!=='Completed').length;
- const open=state.tasks.filter(t=>t.status!=='Done').length;
- const missing=state.documents.filter(d=>d.status==='Missing');
- const pending=state.projects.filter(p=>p.stage==='Expert Review').length;
- const failures=state.automations.filter(a=>a.status==='Failed');
- const projectRows=state.projects.map(p=>`<tr class="click-row" data-detail="project:${p.id}" tabindex="0"><td><b>${p.client}</b><div style="font-size:10px;color:#8797a8;margin-top:2px">${p.id} · ${p.name}</div></td><td>${p.owner}</td><td>${p.stage}</td><td>${p.due}</td><td>${badge(p.status)}</td></tr>`).join('');
- const attention=[
-   ...missing.map(d=>`<div class="attention-row"><span class="att-mark">!</span><div><strong><button class="linktext" data-detail="document:${d.id}">${d.name} is missing →</button></strong><small>${projectName(d.project)} · ${d.owner} to follow up</small></div></div>`),
-   ...state.projects.filter(p=>p.stage==='Expert Review').map(p=>`<div class="attention-row"><span class="att-mark" style="background:#eaf2fd;color:#346ab1">✓</span><div><strong><button class="linktext" data-detail="project:${p.id}">Expert review pending →</button></strong><small>${p.client} · await authorized sign-off</small></div></div>`),
-   ...failures.map(a=>`<div class="attention-row"><span class="att-mark" style="background:#fff0f0;color:#b34e51">×</span><div><strong><button class="linktext" data-nav="automation">${a.name} needs a check →</button></strong><small>Illustrative workflow log · ${a.details}</small></div></div>`)
- ].slice(0,5).join('')||'<div class="empty">Nothing needs attention in the sample workspace.</div>';
- const louisApprovals=state.tasks.filter(t=>t.owner==='Louis'&&t.status!=='Done'&&(t.priority==='High'||t.project==='Investor'));
- const louisApprovalHtml=louisApprovals.length?louisApprovals.map(t=>`<div class="louis-approval-item"><div><strong><button class="linktext" data-detail="task:${t.id}">${t.title} →</button></strong><small>${t.project} · due ${t.due} · waiting on Louis</small></div>${badge(t.priority)}</div>`).join(''):'<div class="louis-approval-empty">No urgent approvals are waiting on Louis.</div>';
- const workload=[['Jeet','Client coordination'],['Brandon','Delivery support'],['Hussnain','Operations'],['Louis','Management']].map(([name,role])=>{const n=state.tasks.filter(t=>t.owner===name&&t.status!=='Done').length;return `<div class="team-row"><div class="initial">${name.slice(0,2).toUpperCase()}</div><div class="who">${name}<div class="role">Sample team assignment</div></div><div class="count">${n} open ${n===1?'task':'tasks'}</div></div>`}).join('');
- const invest=state.investors.map(i=>i.status).reduce((acc,s)=>(acc[s]=(acc[s]||0)+1,acc),{});
- const outreachContacted=state.investors.filter(i=>i.status!=='Scheduled').length;
- const outreachReplies=state.investors.filter(i=>i.status==='Replied'||i.status==='Interested').length;
- const outreachInterested=state.investors.filter(i=>i.status==='Interested').length;
- const outreachFollowups=state.investors.filter(i=>i.status==='Follow-up Due').length;
- const outreachLouis=state.tasks.filter(t=>t.project==='Investor'&&t.owner==='Louis'&&t.status!=='Done').length;
- const outreachProgress=state.investors.length?Math.round((outreachContacted/state.investors.length)*100):0;
- const investorRows=[['Scheduled',invest['Scheduled']||0],['Sent',invest['Sent']||0],['Replied',invest['Replied']||0],['Interested',invest['Interested']||0],['Follow-up Due',invest['Follow-up Due']||0]].map(([s,n])=>`<div class="team-row"><div class="who">${s}</div><div class="count" style="font-weight:750;color:#243e59">${n}</div></div>`).join('');
- const recent=state.activities.slice(0,3).map(a=>`<div class="team-row"><div class="initial">${a.who.slice(0,2).toUpperCase()}</div><div class="who">${a.who}<div class="role">${a.action}</div></div><div class="count">${a.when}</div></div>`).join('');
- $('#dashboard').innerHTML=pageHead('Overview','A clearer view of the work that needs attention.',`<button class="btn" data-nav="tasks">View tasks</button><button class="btn primary" data-open="project">+ New sample project</button>`)+`
- <div class="demo-ribbon"><span class="note-dot"></span><b>Sample workspace</b> Click any project, task, or status to explore connected example records. No messages or reports are sent.</div>
+ const p=peraData||{summary:{},followupReview:{},approvals:[],agency:{},china:{},source:{}};
+ const s=p.summary||{}, agency=p.agency||{}, china=p.china||{}, review=p.followupReview||{};
+ const replyRate=Number(s.replyRate||0);
+ const engaged=state.investors.filter(i=>['Meeting requested','Application','Interested'].includes(i.status));
+ const approvals=p.approvals||[];
+ const approvalBlock=approvals.length?\`<section class="louis-approval-panel" aria-label="Pending Louis approval">
+   <div class="louis-approval-head"><span class="louis-approval-pulse" aria-hidden="true"></span><div class="louis-approval-copy"><span class="louis-approval-kicker">Mark Pending</span><h3>Pending Louis Approval</h3><p>Current approval requests from the PERA Investor Actions tab.</p></div><span class="louis-approval-count">${approvals.length}</span></div>
+   <div class="louis-approval-list">${approvals.map(a=>\`<div class="louis-approval-item"><div><strong>${cleanText(a.firm||a.investor||'Investor action')}</strong><small>${cleanText(a.requestType||a.requestDetails||'Approval requested')} · ${cleanText(a.requestDate||'')}</small></div>${badge(a.priority||'Open')}</div>\`).join('')}</div>
+ </section>\`:'';
+ const engagedRows=engaged.length?engaged.map(i=>\`<div class="team-row"><div class="initial">${cleanText(i.name).slice(0,2).toUpperCase()}</div><div class="who"><b>${cleanText(i.name)}</b><div class="role">${cleanText(i.firm)} · ${cleanText(i.nextAction)}</div></div><div class="count">${badge(i.status)}</div></div>\`).join(''):'<div class="empty">No active interest or application-stage conversations recorded.</div>';
+ const statusOrder=['Meeting requested','Application','Interested','Declined','Follow-up Sent','Hold','Excluded','Sent'];
+ const statusRows=statusOrder.map(st=>[st,state.investors.filter(i=>i.status===st).length]).filter(x=>x[1]>0).map(([st,n])=>\`<div class="team-row"><div class="who">${st}</div><div class="count" style="font-weight:750;color:#243e59">${n}</div></div>\`).join('');
+ const sourceUrl=p.source&&p.source.spreadsheetUrl?p.source.spreadsheetUrl:'#';
+ $('#dashboard').innerHTML=pageHead('Overview','Current fundraising and outreach status sourced from PERA.',\`<a class="btn" href="${sourceUrl}" target="_blank" rel="noopener">Open PERA sheet</a><button class="btn primary" data-nav="investors">Investor Outreach</button>\`)+\`
+ <div class="demo-ribbon"><span class="note-dot"></span><b>PERA source</b> Investor data below comes from the connected PERA Google Sheet snapshot generated ${cleanText(p.generatedAt||'')}. The dashboard is read-only and sends nothing.</div>
  <section class="outreach-zone" aria-label="Outreach streams">
    <div class="outreach-zone-head">
-     <div><div class="outreach-eyebrow">Outreach</div><h3>Outreach streams</h3><p>Investor outreach is active. China and Agency stay locked until those workstreams officially start.</p></div>
-     <span class="outreach-live-pill">Investor outreach active</span>
+     <div><div class="outreach-eyebrow">Outreach</div><h3>Outreach streams</h3><p>Investor outreach uses real PERA data. China and Agency remain locked for sending but show their real pre-launch research counts.</p></div>
+     <span class="outreach-live-pill">PERA investor data loaded</span>
    </div>
    <div class="outreach-stream-grid">
      <button class="outreach-stream outreach-stream-investor" data-nav="investors" type="button" aria-label="Open Investor Outreach">
        <div>
          <div class="outreach-stream-name"><span>↗</span> Investor Outreach</div>
-         <div class="outreach-stream-desc">The active fundraising workstream. Progress reflects tracked investors who have moved beyond Scheduled.</div>
-         <span class="outreach-status"><span class="dot"></span> Live workstream · hover for details</span>
+         <div class="outreach-stream-desc">${Number(s.investorsContacted||0)} investors contacted · ${Number(s.repliesRecorded||0)} replies · ${Number(s.interestedApplication||0)} interested/application-stage.</div>
+         <span class="outreach-status"><span class="dot"></span> Active PERA workstream · hover for details</span>
        </div>
-       <div class="outreach-ring-wrap" aria-label="Investor outreach progress ${outreachProgress}%">
+       <div class="outreach-ring-wrap" aria-label="Investor reply rate ${replyRate}%">
          <svg class="outreach-ring" viewBox="0 0 42 42" aria-hidden="true">
            <circle class="outreach-ring-track" cx="21" cy="21" r="15.9155"></circle>
-           <circle class="outreach-ring-fill" cx="21" cy="21" r="15.9155" pathLength="100" style="--offset:${100-outreachProgress}"></circle>
+           <circle class="outreach-ring-fill" cx="21" cy="21" r="15.9155" pathLength="100" style="--offset:${100-replyRate}"></circle>
          </svg>
-         <div class="outreach-ring-center">${outreachProgress}%<small>progress</small></div>
+         <div class="outreach-ring-center">${replyRate}%<small>reply rate</small></div>
        </div>
        <div class="outreach-hover-details" aria-hidden="true">
-         <div class="outreach-hover-title">Investor outreach snapshot</div>
+         <div class="outreach-hover-title">PERA investor snapshot</div>
          <div class="outreach-hover-grid">
-           <div class="outreach-hover-stat"><b>${state.investors.length}</b><span>Tracked</span></div>
-           <div class="outreach-hover-stat"><b>${outreachContacted}</b><span>Contacted</span></div>
-           <div class="outreach-hover-stat"><b>${outreachReplies}</b><span>Replies</span></div>
-           <div class="outreach-hover-stat"><b>${outreachInterested}</b><span>Interested</span></div>
-           <div class="outreach-hover-stat"><b>${outreachFollowups+outreachLouis}</b><span>Follow-up / approval</span></div>
+           <div class="outreach-hover-stat"><b>${Number(s.investorsContacted||0)}</b><span>Contacted</span></div>
+           <div class="outreach-hover-stat"><b>${Number(s.repliesRecorded||0)}</b><span>Replies</span></div>
+           <div class="outreach-hover-stat"><b>${Number(s.interestedApplication||0)}</b><span>Engaged</span></div>
+           <div class="outreach-hover-stat"><b>${Number(s.followupsSent||0)}</b><span>Follow-ups sent</span></div>
+           <div class="outreach-hover-stat"><b>$${Number(s.verifiedCommitted||0).toLocaleString()}</b><span>Verified committed</span></div>
          </div>
        </div>
      </button>
      <div class="outreach-stream outreach-stream-locked" aria-disabled="true">
-       <div><div class="outreach-lock-icon">🔒</div><div class="outreach-stream-name" style="margin-top:12px">China Outreach</div><div class="outreach-stream-desc">Reserved for the China outreach workflow. No activity is counted here yet.</div></div>
-       <div class="outreach-lock-footer"><span>Locked until kickoff</span><b>Not started</b></div>
+       <div><div class="outreach-lock-icon">🔒</div><div class="outreach-stream-name" style="margin-top:12px">China Outreach</div><div class="outreach-stream-desc">${Number(china.targetsReady||0)} targets ready · ${Number(china.emailsSent||0)} emails sent · ${cleanText(china.geography||'Shanghai')} focus.</div></div>
+       <div class="outreach-lock-footer"><span>Research staged</span><b>${cleanText(china.sendStatus||'LOCKED')}</b></div>
      </div>
      <div class="outreach-stream outreach-stream-locked" aria-disabled="true">
-       <div><div class="outreach-lock-icon">🔒</div><div class="outreach-stream-name" style="margin-top:12px">Agency Outreach</div><div class="outreach-stream-desc">Reserved for enterprise agency prospecting. It stays separate from investor work.</div></div>
-       <div class="outreach-lock-footer"><span>Locked until kickoff</span><b>Not started</b></div>
+       <div><div class="outreach-lock-icon">🔒</div><div class="outreach-stream-name" style="margin-top:12px">Agency Outreach</div><div class="outreach-stream-desc">${Number(agency.targetAccounts||0)} accounts researched · ${Number(agency.shortlist||0)} in Louis review shortlist · ${Number(agency.emailsSent||0)} emails sent.</div></div>
+       <div class="outreach-lock-footer"><span>Research staged</span><b>${cleanText(agency.status||'DO NOT SEND')}</b></div>
      </div>
    </div>
  </section>
- ${louisApprovals.length?`<section class="louis-approval-panel" aria-label="Pending Louis approval">
-   <div class="louis-approval-head">
-     <span class="louis-approval-pulse" aria-hidden="true"></span>
-     <div class="louis-approval-copy"><span class="louis-approval-kicker">Mark Pending</span><h3>Pending Louis Approval</h3><p>Urgent decisions or materials that should not get lost in the normal task list.</p></div>
-     <span class="louis-approval-count">${louisApprovals.length}</span>
-   </div>
-   <div class="louis-approval-list">${louisApprovalHtml}</div>
- </section>`:""}
+ ${approvalBlock}
  <div class="grid kpi-grid">
-  <div class="kpi-action" data-nav="mednova" role="button" tabindex="0">${kpi('▦',active,'Active projects','Click to view client projects')}</div>
-  <div class="kpi-action" data-nav="tasks" role="button" tabindex="0">${kpi('✓',open,'Open tasks','Click to review team work')}</div>
-  <div class="kpi-action" data-nav="documents" role="button" tabindex="0">${kpi('▤',missing.length,'Missing documents','Click to review checklist')}</div>
-  <div class="kpi-action" data-nav="mednova" role="button" tabindex="0">${kpi('○',pending,'Awaiting expert review','Click to view projects')}</div>
-  <div class="kpi-action" data-nav="investors" role="button" tabindex="0">${kpi('↗',state.investors.length,'Investors tracked','Click to see pipeline')}</div>
+  <div class="kpi-action" data-nav="investors" role="button" tabindex="0">${kpi('↗',Number(s.investorsContacted||0),'Investors contacted','Confirmed active PERA first touches')}</div>
+  <div class="kpi-action" data-nav="investors" role="button" tabindex="0">${kpi('↩',Number(s.repliesRecorded||0),'Replies recorded','Current PERA reply count')}</div>
+  <div class="kpi-action" data-nav="investors" role="button" tabindex="0">${kpi('★',Number(s.interestedApplication||0),'Interested / application','Current engaged investor cases')}</div>
+  <div class="kpi-action" data-nav="investors" role="button" tabindex="0">${kpi('✓',Number(s.followupsSent||0),'Follow-ups sent','Confirmed follow-up actions in ledger')}</div>
+  <div class="kpi-action" data-nav="investors" role="button" tabindex="0">${kpi('$','$'+Number(s.verifiedCommitted||0).toLocaleString(),'Verified committed','$'+Number(s.roundTarget||0).toLocaleString()+' round target')}</div>
  </div>
  <div class="dash-section">
-   <div class="card"><div class="card-head"><h3>Client projects</h3><button class="section-link" data-nav="mednova">View all projects →</button></div><div class="table-wrap"><table class="table"><thead><tr><th>Project</th><th>Owner</th><th>Stage</th><th>Due</th><th>Status</th></tr></thead><tbody>${projectRows}</tbody></table></div></div>
-   <div class="card"><div class="card-head"><h3>Needs attention</h3><button class="section-link" data-nav="tasks">Open work →</button></div><div class="card-body">${attention}<p class="side-note">These are example issues to show how Louis could spot blockers and the next owner without chasing updates.</p></div></div>
+   <div class="card"><div class="card-head"><h3>Active investor conversations</h3><button class="section-link" data-nav="investors">Open tracker →</button></div><div class="card-body">${engagedRows}</div></div>
+   <div class="card"><div class="card-head"><h3>Follow-up review</h3><button class="section-link" data-nav="investors">Review PERA investors →</button></div><div class="card-body">
+     <div class="team-row"><div class="who">Original staged candidates<div class="role">19 Follow-ups - Louis Approval</div></div><div class="count">${Number(review.staged||0)}</div></div>
+     <div class="team-row"><div class="who">Completed from staged list</div><div class="count">${Number(review.completed||0)}</div></div>
+     <div class="team-row"><div class="who">Held / pending review</div><div class="count">${Number(review.pending||0)}</div></div>
+     <p class="side-note">Urgent Louis approvals currently open: <b>${approvals.length}</b>. A held follow-up is not the same as an urgent approval.</p>
+   </div></div>
  </div>
  <div class="dash-bottom">
-   <div class="card"><div class="card-head"><h3>Team workload</h3><button class="section-link" data-nav="team">Team view →</button></div><div class="card-body">${workload}</div></div>
-   <div class="card"><div class="card-head"><h3>Investor tracker</h3><button class="section-link" data-nav="investors">Open tracker →</button></div><div class="card-body">${investorRows}<p class="side-note">Scheduled is not sent. Demo changes never trigger outreach.</p></div></div>
-   <div class="card"><div class="card-head"><h3>Recent updates</h3><button class="section-link" data-nav="automation">Workflow log →</button></div><div class="card-body">${recent}<p class="side-note"><span class="status-dot ${failures.length?'warn':'ok'}"></span>${failures.length?failures.length+' sample workflow issue to review':'Sample workflow checks clear'}</p></div></div>
+   <div class="card"><div class="card-head"><h3>Investor status mix</h3><button class="section-link" data-nav="investors">All 50 →</button></div><div class="card-body">${statusRows||'<div class="empty">No investor statuses loaded.</div>'}</div></div>
+   <div class="card"><div class="card-head"><h3>Campaign controls</h3></div><div class="card-body">
+     <div class="team-row"><div class="who">Sequence status</div><div class="count">${cleanText(s.sequenceStatus||'')}</div></div>
+     <div class="team-row"><div class="who">Currently scheduled</div><div class="count">${Number(s.scheduled||0)}</div></div>
+     <div class="team-row"><div class="who">Source of truth</div><div class="count">PERA</div></div>
+     <p class="side-note">No send controls are exposed in this dashboard.</p>
+   </div></div>
+   <div class="card"><div class="card-head"><h3>Source & privacy</h3></div><div class="card-body">
+     <p class="side-note">GitHub displays only safe operational fields. Investor emails, message IDs, and raw notes remain in the private PERA sheet.</p>
+     <a class="btn" href="${sourceUrl}" target="_blank" rel="noopener" style="display:inline-flex;margin-top:8px">Open source sheet</a>
+   </div></div>
  </div>
- <div class="footer-note">Amia Command Center · Interactive concept for internal review · Data and changes stay in this browser only.</div>`;
+ <div class="footer-note">Amia Command Center · Investor Outreach sourced from PERA · Read-only dashboard view.</div>\`;
 }
-
-function renderInvestors(){const rows=state.investors.map(i=>`<tr><td><button class="name-link" data-detail="investor:${i.id}">${i.name}</button><br><span style="color:#7290aa">${i.firm}</span></td><td>${i.score}%</td><td><select class="mini-select investor-status" data-id="${i.id}">${['Sent','Scheduled','Replied','Interested','Follow-up Due'].map(s=>`<option ${s===i.status?'selected':''}>${s}</option>`).join('')}</select></td><td>${i.last}</td><td>${i.follow}</td><td>${i.owner}</td><td><button class="small-btn simulate-reply" data-id="${i.id}">Mark sample reply</button> <button class="small-btn" data-detail="investor:${i.id}">Details</button></td></tr>`).join('');
- $('#investors').innerHTML=pageHead('Investor Outreach','Fundraising outreach, replies, follow-ups, and next actions (no sending).',`<button class="btn" id="exportInvestors">Export CSV</button><button class="btn primary" data-open="investor">+ Add Sample Investor</button>`)+`<div class="callout" style="margin-bottom:14px"><strong>Control rule:</strong> Scheduled is not Sent. Unknown delivery states are not automatically retried in this demo.</div><div class="page-panel"><div class="panel-toolbar"><strong>Investor Pipeline</strong><span class="spacer"></span><span class="badge green">${state.investors.filter(i=>i.score>=60).length} fit 60%+</span></div><div class="table-wrap"><table class="table"><thead><tr><th>Investor</th><th>Fit Score</th><th>Status</th><th>Last Activity</th><th>Follow-up</th><th>Owner</th><th>Demo Action</th></tr></thead><tbody>${rows}</tbody></table></div></div>`}
+function renderInvestors(){
+ const p=peraData||{summary:{},source:{}}, s=p.summary||{};
+ const sourceUrl=p.source&&p.source.spreadsheetUrl?p.source.spreadsheetUrl:'#';
+ const rows=state.investors.map(i=>\`<tr>
+   <td><b>${cleanText(i.name)}</b><br><span style="color:#7290aa">${cleanText(i.firm)}</span></td>
+   <td>${cleanText(i.scoreLabel||String(i.score)+'%')}</td>
+   <td>${badge(i.status)}</td>
+   <td>${cleanText(i.firstSent||'')}</td>
+   <td>${cleanText(i.followReview||'')}</td>
+   <td>${cleanText(i.replyState||'')}</td>
+   <td>${cleanText(i.nextAction||'')}</td>
+ </tr>\`).join('');
+ $('#investors').innerHTML=pageHead('Investor Outreach','Read-only PERA fundraising tracker. The Google Sheet remains the source of truth.',\`<a class="btn" href="${sourceUrl}" target="_blank" rel="noopener">Open PERA sheet</a><button class="btn" id="exportInvestors">Export dashboard CSV</button>\`)+\`
+ <div class="grid kpi-grid">
+  ${kpi('↗',Number(s.investorsContacted||0),'Contacted','Active ledger first touches')}
+  ${kpi('↩',Number(s.repliesRecorded||0),'Replies','Recorded in PERA')}
+  ${kpi('★',Number(s.interestedApplication||0),'Interested / application','Active engagement')}
+  ${kpi('✓',Number(s.followupsSent||0),'Follow-ups sent','Confirmed in ledger')}
+  ${kpi('$','$'+Number(s.verifiedCommitted||0).toLocaleString(),'Verified committed','$'+Number(s.roundTarget||0).toLocaleString()+' target')}
+ </div>
+ <div class="callout" style="margin-bottom:14px"><strong>PERA source:</strong> This view is read-only. Emails, Gmail/Apollo message IDs, and raw notes are intentionally not published to GitHub. No dashboard action sends or changes investor outreach.</div>
+ <div class="page-panel"><div class="panel-toolbar"><strong>Investor Pipeline</strong><span class="spacer"></span><span class="badge green">${state.investors.length} PERA records</span></div><div class="table-wrap"><table class="table"><thead><tr><th>Investor</th><th>Fit Score</th><th>Current Status</th><th>First Sent</th><th>Follow-up Review</th><th>Reply</th><th>Next Action</th></tr></thead><tbody>${rows||'<tr><td colspan="7">PERA data unavailable.</td></tr>'}</tbody></table></div></div>\`;
+}
 function renderMednova(){const cards=state.projects.map(p=>`<div class="project-card"><div style="display:flex;justify-content:space-between;gap:8px"><div><h4><button class="name-link" data-detail="project:${p.id}">${p.client}</button></h4><div class="meta">${p.id} · ${p.name}</div></div>${badge(p.status)}</div><div class="progress"><span style="width:${p.progress}%"></span></div><div class="stage-row"><span>${p.stage}</span><span>${p.progress}%</span></div><div style="margin-top:12px;font-size:10px;color:#91aac0">Owner: <b style="color:#dce8f2">${p.owner}</b> · Due ${p.due}</div>${p.blocker?`<div style="margin-top:8px;color:#ffbd76;font-size:10px">⚠ ${p.blocker}</div>`:''}<div class="doc-actions"><button class="small-btn project-advance" data-id="${p.id}">${p.stage==='Expert Review'?'Record sample approval':'Move to next stage'}</button><button class="small-btn" data-detail="project:${p.id}">Open details</button></div></div>`).join('');
  $('#mednova').innerHTML=pageHead('Client projects','Track stages, owners, due dates, and handoffs.',`<button class="btn primary" data-open="project">+ New Sample Project</button>`)+`<div class="grid project-grid">${cards}</div><div class="callout" style="margin-top:14px"><strong>Important:</strong> the dashboard represents operational status. Formal regulatory approval stays with the authorized expert/review system.</div>`}
 function renderTasks(){const rows=state.tasks.map(t=>`<tr><td><input type="checkbox" data-task-toggle="${t.id}" ${t.status==='Done'?'checked':''}></td><td><button class="name-link" data-detail="task:${t.id}">${t.title}</button></td><td><button class="linktext" data-detail="project:${t.project}">${t.project}</button></td><td>${t.owner}</td><td>${t.due}</td><td><span class="priority-pill ${t.priority}">${t.priority}</span></td><td>${badge(t.status)}</td><td><button class="small-btn task-progress" data-id="${t.id}">Next status</button> <button class="small-btn" data-detail="task:${t.id}">Details</button></td></tr>`).join('');
@@ -687,7 +719,25 @@ function renderDocuments(){const cards=state.documents.map(d=>`<div class="doc-c
  $('#documents').innerHTML=pageHead('Document checklist','Track missing and received items without storing files here.')+`<div class="grid doc-grid">${cards}</div>`}
 function renderAutomation(){const rows=state.automations.map(a=>`<div class="log-row"><div>${a.time}</div><div><b>${a.name}</b></div><div>${badge(a.status)}</div><div>${a.details}</div></div>`).join('');
  $('#automation').innerHTML=pageHead('Workflow log','Illustrative workflow checks. No external integrations are connected.',`<button class="btn success" id="runAutomation">Run Sample Check</button>`)+`<div class="callout" style="margin-bottom:14px"><strong>Fail visibly:</strong> if a workflow fails, the last verified status stays visible and a repair item is created instead of silently changing data.</div><div class="page-panel"><div class="log-row header"><div>Time</div><div>Workflow</div><div>Status</div><div>Details</div></div>${rows}</div>`}
-function renderReports(){const sent=state.investors.length, replies=state.investors.filter(i=>['Replied','Interested'].includes(i.status)).length;$('#reports').innerHTML=pageHead('Summary','An overview of the sample records.',`<button class="btn" id="exportDemo">Export Demo JSON</button>`)+`<div class="grid stack-3"><div class="metric-box"><div class="big">${sent}</div><div class="label">Investors in demo tracker</div></div><div class="metric-box"><div class="big">${replies}</div><div class="label">Positive reply signals</div></div><div class="metric-box"><div class="big">${state.projects.filter(p=>p.status==='At Risk').length}</div><div class="label">Projects at risk</div></div></div><div class="grid stack-2"><div class="card"><div class="card-head"><h3>Project Status Mix</h3></div><div class="card-body"><div class="donut-wrap"><div style="position:relative"><div class="donut" style="background:conic-gradient(var(--green) 0 40%,var(--yellow) 40% 80%,var(--blue) 80% 100%)"></div><div class="donut-center">${state.projects.length}<small>projects</small></div></div><div class="legend"><div class="legend-row"><span class="legend-dot" style="background:var(--green)"></span>On track / complete</div><div class="legend-row"><span class="legend-dot" style="background:var(--yellow)"></span>At risk</div><div class="legend-row"><span class="legend-dot" style="background:var(--blue)"></span>In progress</div></div></div></div></div><div class="card"><div class="card-head"><h3>What Louis Can Answer Quickly</h3></div><div class="card-body"><div class="list"><div class="list-item"><div class="list-icon">1</div><div><strong>What needs attention?</strong><small>At-risk projects, missing documents, failed automation.</small></div></div><div class="list-item"><div class="list-icon">2</div><div><strong>Who owns the next step?</strong><small>Every task and project has an owner.</small></div></div><div class="list-item"><div class="list-icon">3</div><div><strong>What changed?</strong><small>Activity and automation logs expose recent updates.</small></div></div></div></div></div></div>`}
+function renderReports(){
+ const p=peraData||{summary:{}}, s=p.summary||{};
+ $('#reports').innerHTML=pageHead('Summary','Current investor fundraising snapshot from PERA.')+\`
+ <div class="grid kpi-grid">
+  ${kpi('↗',Number(s.investorsContacted||0),'Investors contacted','PERA active ledger')}
+  ${kpi('↩',Number(s.repliesRecorded||0),'Replies recorded','PERA reply count')}
+  ${kpi('★',Number(s.interestedApplication||0),'Interested / application','Current engagement')}
+  ${kpi('✓',Number(s.followupsSent||0),'Follow-ups sent','Confirmed actions')}
+  ${kpi('$','$'+Number(s.verifiedCommitted||0).toLocaleString(),'Verified committed','$'+Number(s.roundTarget||0).toLocaleString()+' target')}
+ </div>
+ <div class="grid stack-2">
+  <div class="card"><div class="card-head"><h3>Fundraising controls</h3></div><div class="card-body">
+    <div class="team-row"><div class="who">Sequence</div><div class="count">${cleanText(s.sequenceStatus||'')}</div></div>
+    <div class="team-row"><div class="who">Currently scheduled</div><div class="count">${Number(s.scheduled||0)}</div></div>
+    <div class="team-row"><div class="who">Reply rate</div><div class="count">${Number(s.replyRate||0)}%</div></div>
+  </div></div>
+  <div class="card"><div class="card-head"><h3>Data source</h3></div><div class="card-body"><p class="side-note">Investor metrics are generated from the PERA Google Sheet. Sensitive fields remain in PERA and are not copied into the public GitHub data file.</p></div></div>
+ </div>\`;
+}
 function renderCustomers(){const rows=state.customers.map(c=>`<tr><td><button class="name-link" data-detail="project:${c.project}">${c.name}</button></td><td>${c.type}</td><td>${badge(c.status==='Active'?'On Track':c.status==='Delivery'?'Completed':'In Progress')}</td><td>${c.owner}</td><td>${c.project}</td><td><button class="small-btn" data-detail="project:${c.project}">Open project</button></td></tr>`).join('');$('#customers').innerHTML=pageHead('Clients','Fictional customers used to explain the demo workflow.')+`<div class="page-panel"><div class="table-wrap"><table class="table"><thead><tr><th>Customer</th><th>Type</th><th>Status</th><th>Owner</th><th>Project</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`}
 function bindDynamic(){
  $$('[data-detail]').forEach(b=>{b.onclick=(e)=>{e.stopPropagation();const [kind,id]=b.dataset.detail.split(':');showDetail(kind,id)}; b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click()}}});
@@ -703,7 +753,7 @@ function bindDynamic(){
  $$('.task-progress').forEach(b=>b.onclick=()=>{const t=state.tasks.find(x=>x.id===b.dataset.id);const st=['Open','In Progress','Done'];t.status=st[(st.indexOf(t.status)+1)%st.length];save();renderAll();toast('Task status',`${t.title} → ${t.status}`)});
  if($('#runAutomation'))$('#runAutomation').onclick=runAutomation;
  if($('#exportDemo'))$('#exportDemo').onclick=()=>downloadFile('amia-demo-data.json',JSON.stringify(state,null,2),'application/json');
- if($('#exportInvestors'))$('#exportInvestors').onclick=()=>{const h='Name,Firm,Fit Score,Status,Last Activity,Follow-up,Owner\n';const csv=h+state.investors.map(i=>[i.name,i.firm,i.score,i.status,i.last,i.follow,i.owner].map(csvq).join(',')).join('\n');downloadFile('amia-demo-investors.csv',csv,'text/csv')};
+ if($('#exportInvestors'))$('#exportInvestors').onclick=()=>{const h='Name,Firm,Fit Score,Status,First Sent,Follow-up Review,Reply,Next Action\n';const csv=h+state.investors.map(i=>[i.name,i.firm,i.scoreLabel||i.score,i.status,i.firstSent,i.followReview,i.replyState,i.nextAction].map(csvq).join(',')).join('\n');downloadFile('pera-investor-outreach.csv',csv,'text/csv')};
  if($('#viewMode'))$('#viewMode').onchange=e=>{const map={'Investor Focus':'investors','MedNova Focus':'mednova','Task Focus':'tasks'};if(map[e.target.value])goPage(map[e.target.value])};
 }
 function showDetail(kind,id){window.__detail={kind,id};renderDetail(kind,id,true)}
@@ -752,14 +802,14 @@ window.addProject=()=>{const id='AM-'+String(state.projects.length+1).padStart(3
 window.addTask=()=>{state.tasks.push({id:'T-'+String(state.tasks.length+1).padStart(3,'0'),title:cleanText($('#fTask').value),project:$('#fTaskProject').value,owner:$('#fTaskOwner').value,due:$('#fTaskDue').value,priority:$('#fTaskPriority').value,status:'Open'});save();closeModal();renderAll();toast('Task created','The sample task was added.')}
 window.addInvestor=()=>{state.investors.push({id:'I-'+String(state.investors.length+1).padStart(3,'0'),name:cleanText($('#fInvName').value),firm:'Demo',score:+$('#fInvScore').value,status:$('#fInvStatus').value,last:'2026-10-19',follow:'2026-10-22',owner:$('#fInvOwner').value});save();closeModal();renderAll();toast('Demo investor added','Investor tracker updated.')}
 function runAutomation(){const missing=state.documents.filter(d=>d.status==='Missing').length, open=state.tasks.filter(t=>t.status!=='Done').length;state.automations.unshift({time:'Just now',name:'Command Center Health Check',status:'Success',details:`Checked ${state.projects.length} projects, ${open} open tasks, ${missing} missing documents`});save();renderAll();toast('Sample check complete',`${missing} missing documents · ${open} open tasks.`)}
-$('#modalClose').onclick=closeModal;$('#modalBackdrop').onclick=e=>{if(e.target.id==='modalBackdrop')closeModal()};$('#quickActionBtn').onclick=()=>openModal('Quick Actions',`<div class="grid stack-2" style="margin-top:0"><button class="btn primary" onclick="closeModal();openForm('project')">+ Add demo project</button><button class="btn" onclick="closeModal();openForm('task')">+ Add demo task</button><button class="btn" onclick="closeModal();openForm('investor')">+ Add demo investor</button><button class="btn success" onclick="closeModal();runAutomation()">Run health check</button></div><div class="skeleton-note">All actions modify demo data in this browser only.</div>`,`<button class="btn" onclick="closeModal()">Close</button>`);
+$('#modalClose').onclick=closeModal;$('#modalBackdrop').onclick=e=>{if(e.target.id==='modalBackdrop')closeModal()};$('#quickActionBtn').onclick=()=>openModal('Quick Actions',`<div class="grid stack-2" style="margin-top:0"><button class="btn primary" onclick="closeModal();openForm('project')">+ Add demo project</button><button class="btn" onclick="closeModal();openForm('task')">+ Add demo task</button><button class="btn success" onclick="closeModal();runAutomation()">Run health check</button></div><div class="skeleton-note">All actions modify demo data in this browser only.</div>`,`<button class="btn" onclick="closeModal()">Close</button>`);
 window.openForm=openForm;window.closeModal=closeModal;window.runAutomation=runAutomation;
 $('#notifyBtn').onclick=()=>toast('Sample alerts',state.documents.filter(d=>d.status==='Missing').length+' missing document(s) · '+state.tasks.filter(t=>t.owner==='Louis'&&t.status!=='Done'&&(t.priority==='High'||t.project==='Investor')).length+' pending Louis approval(s) · '+state.automations.filter(a=>a.status==='Failed').length+' workflow issue(s).');
-$('#resetDemo').onclick=()=>{if(confirm('Reset all demo changes?')){state=structuredClone(defaultState);save();renderAll();goPage('dashboard');toast('Demo reset','Original sample data restored.')}};
+$('#resetDemo').onclick=()=>{if(confirm('Reset local demo-only modules? PERA investor data will remain read-only.')){state=structuredClone(defaultState);applyPeraData();save();renderAll();goPage('dashboard');toast('Local demo reset','PERA investor data reloaded.')}};
 $$('.nav-btn[data-page]').forEach(b=>b.onclick=()=>goPage(b.dataset.page));
 $('#globalSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase(),box=$('#searchResults');if(!q){box.classList.remove('show');return}let r=[];state.projects.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).forEach(x=>r.push({type:'Project',title:`${x.id} — ${x.client}`,sub:x.stage,page:'mednova'}));state.investors.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).forEach(x=>r.push({type:'Investor',title:x.name,sub:x.status,page:'investors'}));state.tasks.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).forEach(x=>r.push({type:'Task',title:x.title,sub:x.owner,page:'tasks'}));state.documents.filter(x=>JSON.stringify(x).toLowerCase().includes(q)).forEach(x=>r.push({type:'Document',title:x.name,sub:`${x.project} · ${x.status}`,page:'documents'}));box.innerHTML=r.slice(0,10).map((x,i)=>`<div class="search-item" data-search-page="${x.page}"><b>${x.title}</b><small>${x.type} · ${x.sub}</small></div>`).join('')||'<div class="empty">No demo results</div>';box.classList.add('show');$$('[data-search-page]').forEach(x=>x.onclick=()=>{goPage(x.dataset.searchPage);box.classList.remove('show');$('#globalSearch').value=''});});
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#globalSearch').focus()}if(e.key==='Escape'){closeModal();$('#searchResults').classList.remove('show')}});
-renderAll();
+loadPeraData().then(()=>renderAll());
 </script>
 </body>
 </html>
