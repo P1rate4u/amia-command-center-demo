@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+  <head>
+    <base target="_top">
+    <style><?!= include("Styles"); ?></style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="brand"><div class="logo">AMIA<span class="logo-dot">.</span></div><div class="brand-sub">INVESTOR WORKSPACE</div><div class="private"><span class="shield">●</span> PRIVATE · READ ONLY</div></div>
+        <nav aria-label="Dashboard navigation">
+          <button class="nav active" type="button" data-page="overview"><span class="nav-icon">◫</span>Overview</button>
+          <button class="nav" type="button" data-page="investors"><span class="nav-icon">♧</span>Investor tracker</button>
+          <button class="nav" type="button" data-page="followups"><span class="nav-icon">◷</span>Follow-up queue</button>
+        </nav>
+        <div class="side-footer">PERA is the source of truth.<p>Investor records are read directly from the existing Google Sheet.</p><div class="small">No Apollo sends or automation.</div></div>
+      </aside>
+      <main class="main">
+        <header class="top"><div class="crumb">Fundraising <span>/</span> Current round</div><div class="top-actions"><span id="sync-state" class="sync-state" role="status">Connecting…</span><button id="refresh" type="button" class="button secondary">↻ Refresh</button></div></header>
+        <div class="content">
+          <div class="hero"><div><div class="eyebrow">AMIA · FUNDRAISING</div><h1 id="page-title">Investor overview</h1><p>Private, real-data dashboard for Louis and the team. PERA remains the source of truth.</p></div><div class="round-pill">$750K ROUND</div></div>
+          <div id="error" class="alert" hidden role="alert"></div>
+          <div class="page show" id="page-overview">
+            <div class="metrics">
+              <div class="metric"><div class="metric-label">Historical contacts</div><div id="historical" class="metric-number">—</div><div class="metric-foot">Includes prior exclusions</div></div>
+              <div class="metric"><div class="metric-label">Active contacts</div><div id="active" class="metric-number">—</div><div class="metric-foot">In PERA outreach ledger</div></div>
+              <div class="metric"><div class="metric-label">Replies</div><div id="replies" class="metric-number">—</div><div class="metric-foot">Responses recorded</div></div>
+              <div class="metric"><div class="metric-label">Follow-ups sent</div><div id="followupSent" class="metric-number">—</div><div class="metric-foot">Previously sent</div></div>
+              <div class="metric accent"><div class="metric-label">Louis approval</div><div id="awaitingApproval" class="metric-number">—</div><div class="metric-foot">Pending follow-up review</div></div>
+            </div>
+            <div class="two-col">
+              <section class="panel"><div class="panel-title"><h2>Fundraising progress</h2><span>Current round</span></div><div id="committed" class="big-money">—</div><div class="muted">Investor-level verified commitments recorded in PERA</div><div class="progress"><div id="progress-fill"></div></div><div class="progress-label"><span>Verified in ledger</span><strong id="progress-pct">—</strong></div><div class="explain">Previously stated commitments are not counted here unless verified investor by investor. This does not mean no capital has been committed.</div></section>
+              <section class="panel"><div class="panel-title"><h2>Outreach activity</h2><span>PERA snapshot</span></div><div class="stat"><span>Application-stage response</span><strong id="interested">—</strong></div><div class="stat"><span>Unassigned follow-up reviews</span><strong id="unassignedDue">—</strong></div><div class="stat"><span>Research candidates</span><strong id="research">—</strong></div><div class="stat"><span>Unverified research emails</span><strong id="unverified">—</strong></div><div class="stat"><span>New investors ready for first touch</span><strong id="newInvestorReady">—</strong></div><div class="stat"><span>Sending actions</span><strong>Disabled</strong></div></section>
+            </div>
+            <section class="panel"><div class="panel-title"><h2>Next team action</h2><span>Human approval required</span></div><div class="action-box"><div class="action-number" id="action-count">—</div><div><strong>Follow-ups awaiting Louis's review</strong><p>Review candidates in the Follow-up queue. Sending remains outside this dashboard and requires a separate explicit approval.</p></div><button class="button primary" type="button" data-goto="followups">View queue →</button></div></section>
+          </div>
+          <div class="page" id="page-investors">
+            <section class="panel"><div class="panel-title"><h2>Active outreach ledger</h2><span id="investor-count">—</span></div><div class="filters"><input type="search" id="search" placeholder="Search investor, firm or email" aria-label="Search investors"><select id="investor-status" aria-label="Filter investor status"><option value="all">All active records</option><option value="replied">Replied</option><option value="interested">Application / Interested</option><option value="staged">Staged for review</option><option value="held">Held / excluded</option></select></div><div class="table-wrap"><table><thead><tr><th>Investor</th><th>Firm</th><th>Fit</th><th>First sent</th><th>Reply / interest</th><th>Workflow</th></tr></thead><tbody id="investor-body"></tbody></table></div><div class="empty" id="investor-empty" hidden>No matching investor records.</div></section>
+          </div>
+          <div class="page" id="page-followups">
+            <section class="panel"><div class="panel-title"><h2>Follow-ups waiting for Louis</h2><span class="pending">Approval required · never automatic</span></div><div class="table-wrap"><table><thead><tr><th>Investor</th><th>Firm</th><th>Fit</th><th>First sent</th><th>Email</th><th>Approval</th></tr></thead><tbody id="approval-body"></tbody></table></div><div class="empty" id="approval-empty" hidden>No pending approval records.</div><p class="help">Approval here is only a view of PERA's status; it does not send or approve emails. Final reply checks are required before any separate sending action.</p></section>
+          </div>
+          <footer>Amia Investor Dashboard · Live Google Sheets read-only view · Data updates on refresh and every 60 seconds · <span id="updated">Not yet connected</span></footer>
+        </div>
+      </main>
+    </div>
+    <script><?!= include("Client"); ?></script>
+  </body>
+</html>

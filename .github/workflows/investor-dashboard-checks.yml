@@ -1,0 +1,39 @@
+name: Investor dashboard checks
+on:
+  pull_request:
+    paths:
+      - "investor-dashboard/**"
+      - ".github/workflows/investor-dashboard-checks.yml"
+  push:
+    branches:
+      - investor-dashboard-v1
+    paths:
+      - "investor-dashboard/**"
+      - ".github/workflows/investor-dashboard-checks.yml"
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: investor-dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install browser test runner
+        run: npm install --no-audit --no-fund
+      - name: Check JavaScript syntax
+        run: |
+          node --check app.js
+          node --check ledger.js
+      - name: Run ledger and privacy regression tests
+        run: npm test
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run interactive browser checks
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/investor-dashboard-http.log 2>&1 &
+          npm run test:browser

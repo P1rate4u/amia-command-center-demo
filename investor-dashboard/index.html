@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Amia | Investor Dashboard V1</title>
+<link rel="stylesheet" href="./styles.css">
+<script type="module" src="./app.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="wordmark">AMIA</div><div class="subtitle">Investor Command Center</div><span class="pill">CURRENT ROUND · REVIEW BUILD</span></div>
+    <nav aria-label="Dashboard">
+      <button class="nav active" data-view="overview"><span>▦</span> Overview</button>
+      <button class="nav" data-view="investors"><span>♙</span> Investor tracker</button>
+      <button class="nav" data-view="followups"><span>◷</span> Follow-up queue</button>
+
+
+
+    </nav>
+    <div class="sidebar-foot"><div class="muted tiny">OUTREACH MAILBOX</div><strong>louislalas@amia.ai</strong><p class="tiny muted">Read-only preview. No Apollo sending or automated follow-ups.</p></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><span>Amia / Fundraising workspace</span><span class="top-right"><span class="status-dot"></span> PERA snapshot · manual refresh</span></header>
+    <div class="content">
+      <div class="page-heading"><div><h1 id="page-title">Fundraising overview</h1><p id="page-description">Current $750K pre-seed round · verified tracker snapshot</p></div><div class="actions"><label class="btn primary" for="import-file">Import Outreach CSV</label><input id="import-file" type="file" accept=".csv,text/csv" hidden><button id="clear-import" class="btn secondary" hidden>Clear import</button></div></div>
+      <div class="notice" role="status" id="data-notice">Showing aggregate counts from the PERA ledger verification. For investor details and follow-up review, export the PERA Outreach Ledger tab as CSV and import it here. The file stays in your browser memory; it is not uploaded or published.</div>
+      <section class="view active" data-panel="overview">
+        <div class="kpis">
+          <article class="kpi"><span>Investors contacted</span><strong id="metric-contacted">46</strong><small>unique first touches in PERA</small></article>
+          <article class="kpi"><span>Replies recorded</span><strong id="metric-replies">3</strong><small>verified in Louis's inbox</small></article>
+          <article class="kpi"><span>Interested / application</span><strong id="metric-interested">1</strong><small>Hustle Fund application; interest not confirmed</small></article>
+          <article class="kpi"><span>Awaiting Louis approval</span><strong id="metric-followups">19</strong><small>staged, not scheduled</small></article>
+          <article class="kpi"><span>Verified commitments</span><strong id="metric-commitments">$0 recorded</strong><small>Prior reported $500K requires investor-level confirmation</small></article>
+        </div>
+        <div class="panel-grid">
+          <article class="panel"><div class="panel-head"><h2>Fundraising progress</h2><span>Target $750,000</span></div><div class="progress"><div id="progress-bar"></div></div><div class="progress-meta"><strong id="progress-label">$0 allocated and verified</strong><span id="progress-pct">0% confirmed</span></div><p class="helper">Earlier outreach stated $500K committed; that figure is not yet reconciled by investor. We intentionally do not add it to the verified total.</p></article>
+          <article class="panel"><div class="panel-head"><h2>Outreach health</h2><span>Manual tracker</span></div><div class="stat-row"><span>Initial emails confirmed</span><strong id="summary-sent">46</strong></div><div class="stat-row"><span>Follow-ups already sent</span><strong id="summary-followup-sent">10</strong></div><div class="stat-row"><span>Replies recorded</span><strong id="summary-replied">3</strong></div><div class="stat-row"><span>Sequence</span><strong>Inactive</strong></div><div class="stat-row"><span>Meetings recorded</span><strong>0 verified</strong></div></article>
+        </div>
+        <article class="panel"><div class="panel-head"><h2>Immediate review priorities</h2><span>Human approval required</span></div><div id="priority-list" class="priority-list"></div></article>
+      </section>
+      <section class="view" data-panel="investors"><article class="panel"><div class="panel-head"><h2>Investor tracker</h2><span id="investor-count">Import PERA CSV to view individual investors</span></div><div class="filters"><input id="investor-search" type="search" placeholder="Search investor, firm or email" aria-label="Search investors"><select id="investor-filter" aria-label="Filter investors"><option value="all">All investors</option><option value="replied">Replied</option><option value="interested">Interested</option><option value="declined">Not interested</option><option value="review">Needs review</option></select></div><div class="table-scroll"><table><thead><tr><th>Investor</th><th>Firm</th><th>First touch</th><th>Reply</th><th>Interest</th><th>Commitment</th></tr></thead><tbody id="investors-body"></tbody></table></div><p id="investors-empty" class="empty">Import the Outreach Ledger CSV to populate investor records.</p></article></section>
+      <section class="view" data-panel="followups"><article class="panel"><div class="panel-head"><h2>Follow-up approval queue</h2><span>19 staged · no automatic sending</span></div><div class="table-scroll"><table><thead><tr><th>Investor</th><th>Firm</th><th>Review date</th><th>Status / next action</th></tr></thead><tbody id="followups-body"></tbody></table></div><p id="followups-empty" class="empty">Import the Outreach Ledger CSV to see the 19 staged follow-ups.</p><p class="helper">Review dates are not approved sends. Check each investor’s current reply and firm-level history before taking action.</p></article></section>
+      <footer>Amia Investor Dashboard · Three-screen review build · No emails are sent by this interface · Data only in browser memory</footer>
+    </div>
+  </main>
+</div>
+</body>
+</html>

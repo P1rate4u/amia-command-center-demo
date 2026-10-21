@@ -1,0 +1,70 @@
+(() => {
+"use strict";
+let data = null, busy = false, currentPage = "overview";
+const $ = id => document.getElementById(id);
+const money = v => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(Number(v)||0);
+const put=(id,v)=>{$(id).textContent=String(v)};
+function textCell(tr,v) { const td=document.createElement("td"); td.textContent=String(v??""); tr.appendChild(td); }
+function row(table,values) { const tr=document.createElement("tr"); values.forEach(v=>textCell(tr,v)); table.appendChild(tr); }
+function page(name) {
+ currentPage=name;
+ document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.page===name));
+ document.querySelectorAll(".page").forEach(p=>p.classList.toggle("show",p.id==="page-"+name));
+ put("page-title",({overview:"Investor overview",investors:"Investor tracker",followups:"Follow-up queue"})[name]);
+}
+function normalize(v) {return String(v??"").toLowerCase();}
+function investorRows() {
+ if(!data)return;
+ const q=normalize($("search").value.trim()), filter=$("investor-status").value;
+ const records=data.investors.filter(r=>{
+   if(q && ![r.name,r.firm,r.email].some(x=>normalize(x).includes(q))) return false;
+   if(filter==="replied")return /^replied/i.test(r.reply);
+   if(filter==="interested")return r.interest==="Interested";
+   if(filter==="staged")return /^staged\b/i.test(r.workflow);
+   if(filter==="held")return /^(hold|exclude)\b/i.test(r.workflow);
+   return true;
+ });
+ const body=$("investor-body");body.replaceChildren();
+ records.forEach(r=>row(body,[r.name,r.firm,r.score+"%",r.firstSent,r.reply+(r.interest?" · "+r.interest:""),r.workflow||"Unassigned"]));
+ put("investor-count",records.length+" of "+data.investors.length+" records");
+ $("investor-empty").hidden=records.length>0;
+}
+function draw(payload) {
+ if(!payload || !payload.metrics || !Array.isArray(payload.investors) || !Array.isArray(payload.approvals))throw new Error("Unexpected PERA server response.");
+ data=payload;
+ const m=payload.metrics;
+ for (const id of ["historical","active","replies","followupSent","awaitingApproval","interested","unassignedDue","research","unverified","newInvestorReady"])
+   put(id,m[id]??"—");
+ put("committed",money(m.committed)+" recorded");
+ put("progress-pct",((m.committed||0)/(m.target||750000)*100).toFixed(1)+"%");
+ $("progress-fill").style.width=Math.min(100,100*(m.committed||0)/(m.target||750000))+"%";
+ put("action-count",m.awaitingApproval);
+ investorRows();
+ const tbody=$("approval-body");tbody.replaceChildren();
+ payload.approvals.forEach(r=>row(tbody,[r.name,r.firm,r.score+"%",r.firstSent,r.email,r.approval]));
+ $("approval-empty").hidden=payload.approvals.length>0;
+ put("updated","Last synced: "+payload.asOf);
+ put("sync-state","● PERA connected");
+ $("error").hidden=true;
+}
+function refresh() {
+ if(busy)return;
+ busy=true;$("refresh").disabled=true;put("sync-state","↻ Syncing PERA…");
+ const done=()=>{busy=false;$("refresh").disabled=false};
+ google.script.run.withSuccessHandler(result=>{try{draw(result)}catch(e){fail(e)}finally{done()}})
+   .withFailureHandler(e=>{fail(e);done()}).getDashboardData();
+}
+function fail(e) {
+ const message=String(e?.message || e || "Unable to load PERA.");
+ put("sync-state","● Sync failed · last successful data may be stale");
+ put("error","Could not load private investor data: "+message);
+ $("error").hidden=false;
+}
+document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>page(b.dataset.page)));
+document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>page(b.dataset.goto)));
+$("search").addEventListener("input",investorRows);
+$("investor-status").addEventListener("change",investorRows);
+$("refresh").addEventListener("click",refresh);
+refresh();
+setInterval(()=>{if(!document.hidden)refresh()},60000);
+})();
