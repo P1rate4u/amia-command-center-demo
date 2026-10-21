@@ -58,6 +58,331 @@ html{color-scheme:light}body{background:#f8fafc!important;color:var(--text)!impo
 .detail-panel{background:#fff;border:1px solid #e5eaf1;border-radius:14px;padding:22px;margin-top:14px;box-shadow:0 3px 20px rgba(27,56,90,.028)}.detail-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}.detail-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.detail-field{font-size:12px;border-bottom:1px solid #edf1f5;padding:9px 0}.detail-field label{display:block;color:#8594a5;font-size:10px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.045em}.detail-field strong{color:#243950}.detail-subhead{margin:16px 0 12px;color:#263e57;font-size:14px}.detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.linktext{font-size:12px;color:#2760aa;border:0;background:transparent;cursor:pointer;padding:0;text-align:left;font-weight:650}.linktext:hover{text-decoration:underline}.filter-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid #edf0f4}.filter-row label{font-size:11px;color:#75869a;font-weight:650}.filter-row select,.filter-row input{font:inherit;font-size:12px;color:#32475d;border:1px solid #dce4ed;border-radius:7px;background:white;padding:8px 10px}.activity-rail{border-left:2px solid #d9e6f6;padding-left:14px;margin:9px 0;color:#526b84;font-size:12px}.demo-guide{background:#fff;border:1px solid #dce8f5;padding:16px 18px;margin-bottom:18px;border-radius:12px;color:#415c77;line-height:1.65;font-size:12px}.demo-guide b{color:#265daa}.priority-pill{border-radius:6px;padding:4px 7px;font-size:10px;font-weight:750}.priority-pill.High{color:#a63d46;background:#fff0f0}.priority-pill.Medium{color:#996615;background:#fff3e0}.priority-pill.Low{color:#336c53;background:#e9f6ed}
 @media(max-width:900px){.detail-grid,.detail-list{grid-template-columns:1fr}.detail-panel{padding:15px}}
 
+
+/* Outreach workspace navigation + animated outreach status */
+.nav-section-label{
+  padding:17px 13px 7px;
+  color:#9aa8b8;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.nav-btn.nav-sub{
+  margin-left:7px;
+  width:calc(100% - 7px);
+  position:relative;
+}
+.nav-btn.nav-sub:before{
+  content:"";
+  position:absolute;
+  left:-7px;
+  top:7px;
+  bottom:7px;
+  width:2px;
+  border-radius:3px;
+  background:#e7ecf2;
+}
+.nav-btn.nav-sub.active:before{background:#3771c6}
+.nav-btn.nav-locked{
+  opacity:.57;
+  cursor:not-allowed;
+  background:transparent!important;
+}
+.nav-btn.nav-locked:hover{background:transparent!important;color:#596b7e!important}
+.nav-lock{
+  margin-left:auto;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:2px 6px;
+  border-radius:999px;
+  background:#f1f3f6;
+  border:1px solid #e3e7ec;
+  color:#8b98a7;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.02em;
+}
+.outreach-zone{
+  margin:0 0 18px;
+  padding:18px;
+  border:1px solid #dfe8f2;
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 12% 0%,rgba(47,111,194,.08),transparent 30%),
+    linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+  box-shadow:0 8px 28px rgba(27,60,97,.045);
+}
+.outreach-zone-head{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  align-items:flex-start;
+  margin-bottom:14px;
+}
+.outreach-eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:#3970af;
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.outreach-eyebrow:before{
+  content:"";
+  width:7px;height:7px;border-radius:50%;
+  background:#2f78cf;
+  box-shadow:0 0 0 5px rgba(47,120,207,.09);
+  animation:outreachPulse 2.1s ease-in-out infinite;
+}
+.outreach-zone-head h3{margin:0;color:#203750;font-size:16px}
+.outreach-zone-head p{margin:5px 0 0;color:#8694a5;font-size:11px}
+.outreach-live-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 9px;
+  border-radius:999px;
+  color:#28785b;
+  background:#edf8f2;
+  border:1px solid #d2ecdf;
+  font-size:9px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.outreach-live-pill:before{
+  content:"";
+  width:6px;height:6px;border-radius:50%;
+  background:#2aa473;
+  animation:outreachPulse 2s ease-in-out infinite;
+}
+.outreach-stream-grid{
+  display:grid;
+  grid-template-columns:1.2fr .9fr .9fr;
+  gap:12px;
+}
+.outreach-stream{
+  position:relative;
+  min-height:168px;
+  border:1px solid #e2e8ef;
+  border-radius:14px;
+  background:#fff;
+  padding:16px;
+  overflow:visible;
+}
+button.outreach-stream{
+  width:100%;
+  text-align:left;
+  color:inherit;
+  font:inherit;
+  cursor:pointer;
+}
+.outreach-stream-investor{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 120px;
+  gap:16px;
+  align-items:center;
+  border-color:#cddff4;
+  background:
+    linear-gradient(115deg,rgba(236,245,255,.92),rgba(255,255,255,.98) 52%),
+    #fff;
+  box-shadow:0 6px 22px rgba(38,93,157,.07);
+  transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+}
+.outreach-stream-investor:hover,
+.outreach-stream-investor:focus-visible{
+  transform:translateY(-3px);
+  border-color:#9ebfe8;
+  box-shadow:0 16px 34px rgba(39,88,145,.13);
+  outline:none;
+}
+.outreach-stream-name{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#263d56;
+  font-size:13px;
+  font-weight:800;
+}
+.outreach-stream-desc{
+  margin-top:6px;
+  color:#7d8ea0;
+  font-size:10px;
+  line-height:1.55;
+}
+.outreach-status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:12px;
+  padding:5px 8px;
+  border-radius:8px;
+  color:#2d6db7;
+  background:#eaf3ff;
+  border:1px solid #d3e5fb;
+  font-size:9px;
+  font-weight:800;
+}
+.outreach-status .dot{
+  width:6px;height:6px;border-radius:50%;background:#3382d8;
+  box-shadow:0 0 0 4px rgba(51,130,216,.08);
+}
+.outreach-ring-wrap{
+  width:112px;
+  height:112px;
+  position:relative;
+  display:grid;
+  place-items:center;
+  margin-left:auto;
+}
+.outreach-ring{
+  width:112px;height:112px;
+  transform:rotate(-90deg);
+  filter:drop-shadow(0 7px 14px rgba(37,100,174,.10));
+}
+.outreach-ring-track{
+  fill:none;
+  stroke:#e8eef5;
+  stroke-width:9;
+}
+.outreach-ring-fill{
+  fill:none;
+  stroke:#2e73c6;
+  stroke-linecap:round;
+  stroke-width:9;
+  stroke-dasharray:100;
+  stroke-dashoffset:var(--offset);
+  animation:ringDraw 1.15s cubic-bezier(.2,.75,.25,1) both;
+}
+.outreach-ring-center{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  text-align:center;
+  color:#204b7e;
+  font-size:22px;
+  font-weight:850;
+  letter-spacing:-.04em;
+}
+.outreach-ring-center small{
+  display:block;
+  margin-top:1px;
+  color:#8a98a8;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.outreach-hover-details{
+  position:absolute;
+  z-index:5;
+  left:14px;
+  right:14px;
+  top:calc(100% - 5px);
+  opacity:0;
+  transform:translateY(-5px) scale(.985);
+  pointer-events:none;
+  border:1px solid #d7e4f2;
+  border-radius:12px;
+  padding:11px 12px;
+  background:rgba(255,255,255,.98);
+  box-shadow:0 18px 40px rgba(32,67,105,.16);
+  transition:opacity .18s ease,transform .18s ease;
+}
+.outreach-stream-investor:hover .outreach-hover-details,
+.outreach-stream-investor:focus-visible .outreach-hover-details{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+.outreach-hover-title{
+  color:#6d7f92;
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  font-weight:850;
+  margin-bottom:7px;
+}
+.outreach-hover-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:7px;
+}
+.outreach-hover-stat{
+  padding:7px 6px;
+  border-radius:8px;
+  background:#f6f9fc;
+  border:1px solid #eaf0f5;
+  text-align:center;
+}
+.outreach-hover-stat b{display:block;color:#233d59;font-size:13px}
+.outreach-hover-stat span{display:block;color:#8493a3;font-size:8px;margin-top:2px}
+.outreach-stream-locked{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  color:#7f8d9d;
+  background:
+    linear-gradient(135deg,rgba(248,249,251,.98),rgba(244,246,249,.95)),
+    #f7f8fa;
+  border-style:dashed;
+}
+.outreach-lock-icon{
+  width:37px;height:37px;border-radius:11px;
+  display:grid;place-items:center;
+  background:#f0f2f5;
+  border:1px solid #e2e6eb;
+  color:#8b97a5;
+  font-size:16px;
+}
+.outreach-lock-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-top:15px;
+  padding-top:12px;
+  border-top:1px solid #eceff3;
+  font-size:9px;
+  color:#9aa5b1;
+}
+.outreach-lock-footer b{
+  color:#7e8a97;
+  padding:3px 6px;
+  border-radius:999px;
+  background:#eceff2;
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+@keyframes ringDraw{from{stroke-dashoffset:100}to{stroke-dashoffset:var(--offset)}}
+@keyframes outreachPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.82)}}
+@media(max-width:1100px){.outreach-stream-grid{grid-template-columns:1fr 1fr}.outreach-stream-investor{grid-column:1/-1}}
+@media(max-width:800px){
+  .nav-section-label{display:none}
+  .nav-btn.nav-sub{margin-left:0;width:100%}
+  .nav-btn.nav-sub:before,.nav-lock{display:none}
+  .outreach-stream-grid{grid-template-columns:1fr}
+  .outreach-stream-investor{grid-column:auto}
+  .outreach-zone{padding:14px}
+  .outreach-zone-head{align-items:flex-start}
+}
+@media(hover:none){
+  .outreach-hover-details{
+    position:static;
+    opacity:1;
+    transform:none;
+    margin-top:12px;
+    grid-column:1/-1;
+    box-shadow:none;
+  }
+}
+
 </style>
 <meta name="description" content="Interactive sample workspace for the proposed Amia Command Center. Fictional data only; no live connections." />
 </head>
@@ -67,7 +392,10 @@ html{color-scheme:light}body{background:#f8fafc!important;color:var(--text)!impo
     <div class="brand"><div class="brand-mark">AMIA</div><div class="brand-sub">Command Center</div><div class="demo-pill"><span class="pulse-dot"></span>SAMPLE WORKSPACE</div></div>
     <nav class="nav" id="nav">
       <button class="nav-btn active" data-page="dashboard"><span class="nav-icon">⌂</span><span>Overview</span></button>
-      <button class="nav-btn" data-page="investors"><span class="nav-icon">↗</span><span>Investor Tracker</span></button>
+      <div class="nav-section-label">Outreach</div>
+      <button class="nav-btn nav-sub" data-page="investors"><span class="nav-icon">↗</span><span>Investor Outreach</span></button>
+      <button class="nav-btn nav-sub nav-locked" type="button" disabled title="China Outreach has not started yet"><span class="nav-icon">CN</span><span>China Outreach</span><span class="nav-lock">🔒 Not started</span></button>
+      <button class="nav-btn nav-sub nav-locked" type="button" disabled title="Agency Outreach has not started yet"><span class="nav-icon">AG</span><span>Agency Outreach</span><span class="nav-lock">🔒 Not started</span></button>
       <button class="nav-btn" data-page="mednova"><span class="nav-icon">M</span><span>Client Projects</span></button>
       <button class="nav-btn" data-page="tasks"><span class="nav-icon">✓</span><span>Team Tasks</span></button>
       <button class="nav-btn" data-page="team"><span class="nav-icon">◎</span><span>Team Updates</span></button>
@@ -188,10 +516,56 @@ function renderDashboard(){
  ].slice(0,5).join('')||'<div class="empty">Nothing needs attention in the sample workspace.</div>';
  const workload=[['Jeet','Client coordination'],['Brandon','Delivery support'],['Hussnain','Operations'],['Louis','Management']].map(([name,role])=>{const n=state.tasks.filter(t=>t.owner===name&&t.status!=='Done').length;return `<div class="team-row"><div class="initial">${name.slice(0,2).toUpperCase()}</div><div class="who">${name}<div class="role">Sample team assignment</div></div><div class="count">${n} open ${n===1?'task':'tasks'}</div></div>`}).join('');
  const invest=state.investors.map(i=>i.status).reduce((acc,s)=>(acc[s]=(acc[s]||0)+1,acc),{});
+ const outreachContacted=state.investors.filter(i=>i.status!=='Scheduled').length;
+ const outreachReplies=state.investors.filter(i=>i.status==='Replied'||i.status==='Interested').length;
+ const outreachInterested=state.investors.filter(i=>i.status==='Interested').length;
+ const outreachFollowups=state.investors.filter(i=>i.status==='Follow-up Due').length;
+ const outreachLouis=state.tasks.filter(t=>t.project==='Investor'&&t.owner==='Louis'&&t.status!=='Done').length;
+ const outreachProgress=state.investors.length?Math.round((outreachContacted/state.investors.length)*100):0;
  const investorRows=[['Scheduled',invest['Scheduled']||0],['Sent',invest['Sent']||0],['Replied',invest['Replied']||0],['Interested',invest['Interested']||0],['Follow-up Due',invest['Follow-up Due']||0]].map(([s,n])=>`<div class="team-row"><div class="who">${s}</div><div class="count" style="font-weight:750;color:#243e59">${n}</div></div>`).join('');
  const recent=state.activities.slice(0,3).map(a=>`<div class="team-row"><div class="initial">${a.who.slice(0,2).toUpperCase()}</div><div class="who">${a.who}<div class="role">${a.action}</div></div><div class="count">${a.when}</div></div>`).join('');
  $('#dashboard').innerHTML=pageHead('Overview','A clearer view of the work that needs attention.',`<button class="btn" data-nav="tasks">View tasks</button><button class="btn primary" data-open="project">+ New sample project</button>`)+`
  <div class="demo-ribbon"><span class="note-dot"></span><b>Sample workspace</b> Click any project, task, or status to explore connected example records. No messages or reports are sent.</div>
+ <section class="outreach-zone" aria-label="Outreach streams">
+   <div class="outreach-zone-head">
+     <div><div class="outreach-eyebrow">Outreach</div><h3>Outreach streams</h3><p>Investor outreach is active. China and Agency stay locked until those workstreams officially start.</p></div>
+     <span class="outreach-live-pill">Investor outreach active</span>
+   </div>
+   <div class="outreach-stream-grid">
+     <button class="outreach-stream outreach-stream-investor" data-nav="investors" type="button" aria-label="Open Investor Outreach">
+       <div>
+         <div class="outreach-stream-name"><span>↗</span> Investor Outreach</div>
+         <div class="outreach-stream-desc">The active fundraising workstream. Progress reflects tracked investors who have moved beyond Scheduled.</div>
+         <span class="outreach-status"><span class="dot"></span> Live workstream · hover for details</span>
+       </div>
+       <div class="outreach-ring-wrap" aria-label="Investor outreach progress \${outreachProgress}%">
+         <svg class="outreach-ring" viewBox="0 0 42 42" aria-hidden="true">
+           <circle class="outreach-ring-track" cx="21" cy="21" r="15.9155"></circle>
+           <circle class="outreach-ring-fill" cx="21" cy="21" r="15.9155" pathLength="100" style="--offset:\${100-outreachProgress}"></circle>
+         </svg>
+         <div class="outreach-ring-center">\${outreachProgress}%<small>progress</small></div>
+       </div>
+       <div class="outreach-hover-details" aria-hidden="true">
+         <div class="outreach-hover-title">Investor outreach snapshot</div>
+         <div class="outreach-hover-grid">
+           <div class="outreach-hover-stat"><b>\${state.investors.length}</b><span>Tracked</span></div>
+           <div class="outreach-hover-stat"><b>\${outreachContacted}</b><span>Contacted</span></div>
+           <div class="outreach-hover-stat"><b>\${outreachReplies}</b><span>Replies</span></div>
+           <div class="outreach-hover-stat"><b>\${outreachInterested}</b><span>Interested</span></div>
+           <div class="outreach-hover-stat"><b>\${outreachFollowups+outreachLouis}</b><span>Follow-up / approval</span></div>
+         </div>
+       </div>
+     </button>
+     <div class="outreach-stream outreach-stream-locked" aria-disabled="true">
+       <div><div class="outreach-lock-icon">🔒</div><div class="outreach-stream-name" style="margin-top:12px">China Outreach</div><div class="outreach-stream-desc">Reserved for the China outreach workflow. No activity is counted here yet.</div></div>
+       <div class="outreach-lock-footer"><span>Locked until kickoff</span><b>Not started</b></div>
+     </div>
+     <div class="outreach-stream outreach-stream-locked" aria-disabled="true">
+       <div><div class="outreach-lock-icon">🔒</div><div class="outreach-stream-name" style="margin-top:12px">Agency Outreach</div><div class="outreach-stream-desc">Reserved for enterprise agency prospecting. It stays separate from investor work.</div></div>
+       <div class="outreach-lock-footer"><span>Locked until kickoff</span><b>Not started</b></div>
+     </div>
+   </div>
+ </section>
  <div class="grid kpi-grid">
   <div class="kpi-action" data-nav="mednova" role="button" tabindex="0">${kpi('▦',active,'Active projects','Click to view client projects')}</div>
   <div class="kpi-action" data-nav="tasks" role="button" tabindex="0">${kpi('✓',open,'Open tasks','Click to review team work')}</div>
@@ -212,7 +586,7 @@ function renderDashboard(){
 }
 
 function renderInvestors(){const rows=state.investors.map(i=>`<tr><td><button class="name-link" data-detail="investor:${i.id}">${i.name}</button><br><span style="color:#7290aa">${i.firm}</span></td><td>${i.score}%</td><td><select class="mini-select investor-status" data-id="${i.id}">${['Sent','Scheduled','Replied','Interested','Follow-up Due'].map(s=>`<option ${s===i.status?'selected':''}>${s}</option>`).join('')}</select></td><td>${i.last}</td><td>${i.follow}</td><td>${i.owner}</td><td><button class="small-btn simulate-reply" data-id="${i.id}">Mark sample reply</button> <button class="small-btn" data-detail="investor:${i.id}">Details</button></td></tr>`).join('');
- $('#investors').innerHTML=pageHead('Investor tracker','Sample statuses and follow-up planning (no sending).',`<button class="btn" id="exportInvestors">Export CSV</button><button class="btn primary" data-open="investor">+ Add Sample Investor</button>`)+`<div class="callout" style="margin-bottom:14px"><strong>Control rule:</strong> Scheduled is not Sent. Unknown delivery states are not automatically retried in this demo.</div><div class="page-panel"><div class="panel-toolbar"><strong>Investor Pipeline</strong><span class="spacer"></span><span class="badge green">${state.investors.filter(i=>i.score>=60).length} fit 60%+</span></div><div class="table-wrap"><table class="table"><thead><tr><th>Investor</th><th>Fit Score</th><th>Status</th><th>Last Activity</th><th>Follow-up</th><th>Owner</th><th>Demo Action</th></tr></thead><tbody>${rows}</tbody></table></div></div>`}
+ $('#investors').innerHTML=pageHead('Investor Outreach','Fundraising outreach, replies, follow-ups, and next actions (no sending).',`<button class="btn" id="exportInvestors">Export CSV</button><button class="btn primary" data-open="investor">+ Add Sample Investor</button>`)+`<div class="callout" style="margin-bottom:14px"><strong>Control rule:</strong> Scheduled is not Sent. Unknown delivery states are not automatically retried in this demo.</div><div class="page-panel"><div class="panel-toolbar"><strong>Investor Pipeline</strong><span class="spacer"></span><span class="badge green">${state.investors.filter(i=>i.score>=60).length} fit 60%+</span></div><div class="table-wrap"><table class="table"><thead><tr><th>Investor</th><th>Fit Score</th><th>Status</th><th>Last Activity</th><th>Follow-up</th><th>Owner</th><th>Demo Action</th></tr></thead><tbody>${rows}</tbody></table></div></div>`}
 function renderMednova(){const cards=state.projects.map(p=>`<div class="project-card"><div style="display:flex;justify-content:space-between;gap:8px"><div><h4><button class="name-link" data-detail="project:${p.id}">${p.client}</button></h4><div class="meta">${p.id} · ${p.name}</div></div>${badge(p.status)}</div><div class="progress"><span style="width:${p.progress}%"></span></div><div class="stage-row"><span>${p.stage}</span><span>${p.progress}%</span></div><div style="margin-top:12px;font-size:10px;color:#91aac0">Owner: <b style="color:#dce8f2">${p.owner}</b> · Due ${p.due}</div>${p.blocker?`<div style="margin-top:8px;color:#ffbd76;font-size:10px">⚠ ${p.blocker}</div>`:''}<div class="doc-actions"><button class="small-btn project-advance" data-id="${p.id}">${p.stage==='Expert Review'?'Record sample approval':'Move to next stage'}</button><button class="small-btn" data-detail="project:${p.id}">Open details</button></div></div>`).join('');
  $('#mednova').innerHTML=pageHead('Client projects','Track stages, owners, due dates, and handoffs.',`<button class="btn primary" data-open="project">+ New Sample Project</button>`)+`<div class="grid project-grid">${cards}</div><div class="callout" style="margin-top:14px"><strong>Important:</strong> the dashboard represents operational status. Formal regulatory approval stays with the authorized expert/review system.</div>`}
 function renderTasks(){const rows=state.tasks.map(t=>`<tr><td><input type="checkbox" data-task-toggle="${t.id}" ${t.status==='Done'?'checked':''}></td><td><button class="name-link" data-detail="task:${t.id}">${t.title}</button></td><td><button class="linktext" data-detail="project:${t.project}">${t.project}</button></td><td>${t.owner}</td><td>${t.due}</td><td><span class="priority-pill ${t.priority}">${t.priority}</span></td><td>${badge(t.status)}</td><td><button class="small-btn task-progress" data-id="${t.id}">Next status</button> <button class="small-btn" data-detail="task:${t.id}">Details</button></td></tr>`).join('');
